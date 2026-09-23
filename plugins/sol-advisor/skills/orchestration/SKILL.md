@@ -33,15 +33,16 @@ mode: solo | delegate | audit | full
 risk: <concise, task-specific rationale>
 ~~~
 
-No task tool call may precede this declaration. Choose `solo` unless a stated risk
-justifies another mode. A later declaration may only escalate the route when newly
-observed risk justifies it; never silently downgrade. Record the evidence for an
-escalation. Details and the task-scoped preflight matrix are in operations.md.
+No task tool call may precede this declaration. Choose `solo` unless a stated
+delivery or review need justifies another mode. If newly observed evidence changes
+who should implement or whether review is needed, declare the revised route and
+reason. Never silently omit a promised review. Details and the task-scoped
+preflight matrix are in operations.md.
 
 ## Preflight selected auxiliaries only
 
 Confirm Sol / High in the primary session. Preflight only an auxiliary selected by the
-declared route: none for solo; Luna / Max or Luna / High for delegate; fresh Sol / High
+declared route: none for solo; Luna / High or Luna / Max for delegate; fresh Sol / High
 for audit; and the selected implementer plus fresh Sol reviewer for full. Public metadata
 for role, model, and effort is authoritative. If it omits a model or effort, use the
 local inspector only for that omitted field. Missing, conflicting, unavailable, or
@@ -51,19 +52,23 @@ model, effort, or reviewer.
 ## Route delivery without duplication
 
 - `solo`: root plans, implements, tests, and self-reviews; spawn no auxiliary.
-- `delegate`: select Luna / Max for bounded, fully specified work, or Luna / High for
-  judgment-heavy, high-risk, context-heavy, or wide-blast-radius work. The selected
-  implementer executes the complete spec; root verifies; do not request a fresh review.
+- `delegate`: select Luna / High for bounded, fully specified work. Select Luna / Max
+  only for bounded work with settled architecture and acceptance criteria when
+  technical depth matters more than speed or usage. The selected implementer executes
+  the complete spec; root verifies; do not request a fresh review by default.
 - `audit`: root implements and verifies; a fresh read-only Sol / High reviewer reviews
-  the accumulated diff; spawn no implementer.
-- `full`: only for an explicit broad or high-risk exception. Select one implementer,
-  root verifies, then a fresh read-only Sol / High reviewer reviews.
+  the accumulated diff; spawn no implementer. Prefer this for ambiguous, judgment-heavy,
+  or high-risk implementation that benefits from independent scrutiny.
+- `full`: only for an explicit broad or high-risk exception whose implementation is
+  nevertheless bounded and fully specified. Select one Luna implementer, root verifies,
+  then a fresh read-only Sol / High reviewer reviews. If the architecture or acceptance
+  criteria are unsettled, the root implements instead.
 
-Auxiliary work must substitute for root work, not duplicate it. A Luna / Max result may
-justify escalation to Luna / High only when it reveals newly observed complexity,
-risk, wide blast radius, or misclassification. A corrected Luna / Max attempt is
-reserved for a specification error and is not a prerequisite for Luna / High. Any
-route change must be declared and evidenced; do not silently downgrade.
+Auxiliary work must substitute for root work, not duplicate it. A Luna / High result
+may justify Luna / Max only when it reveals a bounded, fully specified problem needing
+deeper technical reasoning. Ambiguity, material risk, architecture changes, or broad
+judgment calls require Sol / High to take over implementation. Record the evidence
+for any change of route or implementer; never silently downgrade review commitments.
 
 ## Keep architect work in the primary session
 
@@ -96,7 +101,8 @@ implements its own fixes. `solo` and `delegate` do not receive a fresh reviewer.
 - fix-first applies only to `audit` and `full`:
   - audit: the root implements the required correction, re-verifies, and obtains a new
     fresh reviewer.
-  - full: the selected implementer handles the required correction, the root
+  - full: the selected implementer handles a correction within the settled spec.
+    If Sol / High has taken over implementation, the root handles it. The root
     re-verifies, and a new fresh reviewer reviews.
   - solo and delegate: no fresh reviewer is added unless a newly observed,
     risk-evidenced route escalation is declared; never silently add one.

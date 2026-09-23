@@ -10,8 +10,8 @@ The installed TOMLs are the source of truth:
 
 | Role type | Model | Effort | Use |
 |---|---|---|---|
-| sol_advisor_luna_implementer | gpt-6-luna | max | Delegate/full bounded routine implementation |
-| sol_advisor_luna_high_implementer | gpt-6-luna | high | Delegate/full judgment-heavy or high-risk implementation |
+| sol_advisor_luna_implementer | gpt-6-luna | high | Delegate/full bounded routine implementation |
+| sol_advisor_luna_max_implementer | gpt-6-luna | max | Delegate/full bounded, fully specified deep technical work |
 | sol_advisor_sol_reviewer | gpt-6-sol | high | Audit/full fresh review; requests read-only sandbox |
 
 Native spawn requests name the role and use a fresh context:
@@ -21,10 +21,11 @@ agent_type: sol_advisor_luna_implementer
 fork_turns: none
 ~~~
 
-Use the Luna High type only when the selected delegate or full route needs it:
+Use the Luna Max type only when the selected delegate or full route needs extra
+technical reasoning within a settled specification:
 
 ~~~text
-agent_type: sol_advisor_luna_high_implementer
+agent_type: sol_advisor_luna_max_implementer
 fork_turns: none
 ~~~
 
@@ -62,8 +63,9 @@ sh "$installer" --check
 
 The installer is fail-closed and performs its own post-install exactness check. It
 recognizes only byte-exact historical templates, including the shipped v0.2.0,
-v0.5.0, and v0.6.0 profiles. During the v0.7.0 upgrade it replaces the model pins and
-retires the old high-risk role name only when that installed file is byte-exact.
+v0.5.0, v0.6.0, and v0.7.0 profiles. During the v0.8.0 upgrade it changes the routine
+Luna pin to High, installs the bounded deep-work Luna / Max role, and retires the
+old Luna High role name only when that installed file is byte-exact.
 Modified, unsafe, nonregular, symlinked, or conflicting destinations remain refusals,
 and all mutations are preflighted.
 
@@ -76,9 +78,9 @@ risk: <concise, task-specific rationale>
 ~~~
 
 Solo is the default. One auxiliary is the default maximum; full is an explicit broad
-or high-risk exception. The root may emit a later declaration only to escalate when
-newly observed risk justifies it. It records that evidence and never silently
-downgrades.
+or high-risk exception. If newly observed evidence changes the implementer or review
+need, the root declares the revised route and reason. It never silently omits a
+promised review.
 
 The existing --check flag verifies all three roles. For task-scoped preflight, check
 only the auxiliaries selected by the declaration; every check is non-mutating and
@@ -87,8 +89,8 @@ fail-closed:
 | Route | Required companion checks |
 |---|---|
 | solo | None |
-| delegate (Luna Max) | `--check --check-role luna-max` |
 | delegate (Luna High) | `--check --check-role luna-high` |
+| delegate (Luna Max) | `--check --check-role luna-max` |
 | audit | `--check --check-role sol` |
 | full (Luna Max) | `--check --check-role luna-max --check-role sol` |
 | full (Luna High) | `--check --check-role luna-high --check-role sol` |
@@ -105,11 +107,12 @@ check ignores unselected role destinations, while the all-role --check behavior
 remains unchanged. Cache successful checks only for the task; never carry them across
 later tasks, installation/update, or routing/configuration changes.
 
-Luna / Max is for bounded, fully specified work. Luna / High is selected for
-judgment-heavy, high-risk, context-heavy, or wide-blast-radius work. A Luna / Max
-result may justify a declared Luna / High escalation only when it shows newly observed
-risk. One corrected Luna / Max attempt is reserved for a specification error and is
-not a prerequisite for Luna / High.
+Luna / High is the default for bounded, fully specified work. Luna / Max is selected
+only when the architecture and acceptance criteria are settled and technical depth
+matters more than speed or usage. A Luna / High result may justify Luna / Max when
+it reveals that narrow need. Ambiguity, material risk, or architecture changes require
+Sol / High to take over implementation. A specification error is corrected before
+another attempt.
 
 If public metadata omits model or effort, use the local inspector below as a fallback
 for those omitted fields only. Do not use it to replace available public evidence.
@@ -138,8 +141,9 @@ conflicting model/effort/sandbox/permission/working-directory values. It never p
 prompts, messages, environment variables, tokens, configuration, or arbitrary rollout
 payloads.
 
-Accepted routing is Luna / max for bounded delegate/full implementation, Luna / high
-for higher-risk delegate/full implementation, and Sol / high for audit/full review.
+Accepted routing is Luna / high for routine bounded delegate/full implementation,
+Luna / max for exceptional bounded deep technical work, and Sol / high for audit/full
+review. Judgment-heavy or high-risk implementation stays with the primary Sol / High.
 If public and local evidence both exist, they must agree. The local inspector is not a
 model-selection fallback.
 
@@ -160,7 +164,7 @@ verdict; parent verification and a new fresh review are required.
 
 ## Worker packet and parent acceptance
 
-Every Luna / Max or Luna / High prompt uses the five-part packet in role-contracts.md:
+Every Luna / High or Luna / Max prompt uses the five-part packet in role-contracts.md:
 
 - OBJECTIVE
 - FILES AND OWNERSHIP
@@ -173,11 +177,13 @@ complete diff inspection, verification reruns, correction/escalation decisions, 
 acceptance. Worker claims never replace direct inspection.
 
 In solo, the root plans, implements, tests, and self-reviews with no auxiliary. In
-delegate, one selected Luna implementer completes the spec and the root
-verifies with no fresh reviewer. In audit, the root implements and verifies, then a
-fresh Sol reviewer reviews. In full, one selected implementer completes the spec, the
-root verifies, and a fresh Sol reviewer reviews. Auxiliary work substitutes for root
-work; it does not duplicate it. A reviewer never fixes its own findings.
+delegate, one selected Luna implementer completes a settled spec and the root
+verifies with no fresh reviewer by default. In audit, the root implements and verifies,
+then a fresh Sol reviewer reviews. In full, a bounded implementer completes the spec,
+the root verifies, and a fresh Sol reviewer reviews. If a worker reveals ambiguity or
+material risk, Sol / High takes over and keeps the promised review. Auxiliary work
+substitutes for root work; it does not duplicate it. A reviewer never fixes its own
+findings.
 
 ## Maintainer verification
 
@@ -190,7 +196,7 @@ git status --short
 git diff --stat
 ~~~
 
-The verifier covers the v0.7.0 manifest, exact GPT-6 three-role TOMLs,
+The verifier covers the v0.8.0 manifest, exact GPT-6 three-role TOMLs,
 selective-routing contracts, concise README journey, absence of retired active routes,
 safe historical migration, installer refusal fixtures, Luna runtime evidence,
 JSON/TOML validity, and shell syntax.

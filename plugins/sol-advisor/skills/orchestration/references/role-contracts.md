@@ -18,11 +18,11 @@ risk: <concise, task-specific rationale>
 ~~~
 
 Solo is the default; one auxiliary is the default maximum. Full is an explicit broad
-or high-risk exception. A later route declaration may only escalate after newly
-observed risk justifies it and supplies that evidence; never silently downgrade.
+or high-risk exception. Declare any change of implementer or review commitment with
+the newly observed evidence. Never silently omit a promised review.
 
 Confirm Sol / High in the primary session, then preflight only auxiliaries selected by
-the route: none for solo; Luna / Max or Luna / High for delegate; fresh Sol / High
+the route: none for solo; Luna / High or Luna / Max for delegate; fresh Sol / High
 for audit; and one selected implementer plus fresh Sol reviewer for full. Cache each
 successful check only for the task. After spawning, complete the selected role's
 routing and reviewer-isolation checks before accepting the result:
@@ -30,8 +30,8 @@ routing and reviewer-isolation checks before accepting the result:
 1. Require the selected exact native role and fresh-context spawn contract.
 2. Observe the selected role, model, and effort through public spawn/details metadata
    first, using the local runtime inspector only for omitted fields. Accept Luna /
-   Max for bounded delegate/full implementation, Luna / High for higher-risk
-   delegate/full implementation, and Sol / High for audit/full review.
+   High for routine delegate/full implementation, Luna / Max only for bounded,
+   fully specified deep technical work, and Sol / High for audit/full review.
 3. For the reviewer, capture actual sandbox policy and permission profile types.
 
 A missing, stale, unsafe, conflicting, unavailable, inconsistent, or unobservable
@@ -40,7 +40,7 @@ are pinned by custom-agent TOML, so omit native per-spawn overrides.
 
 ## Shared implementation contract
 
-Every Luna / Max or Luna / High prompt must contain all five sections:
+Every Luna / High or Luna / Max prompt must contain all five sections:
 
 ~~~text
 OBJECTIVE
@@ -83,32 +83,34 @@ The primary session must inspect the diff and rerun verification itself.
 ## Exact mode contracts
 
 - `solo`: root plans, implements, tests, and self-reviews. Spawn no auxiliary.
-- `delegate`: one selected Luna / Max or Luna / High implementer executes the complete
-  five-part specification. The root verifies. Do not spawn a fresh reviewer.
+- `delegate`: one selected Luna / High implementer executes the complete five-part
+  specification; use Luna / Max only for bounded, fully specified deep technical
+  work. The root verifies. Do not spawn a fresh reviewer by default.
 - `audit`: root implements and verifies. A fresh read-only Sol / High reviewer inspects
-  the accumulated diff. Spawn no implementer. On `fix-first`, the root implements the
-  correction, re-verifies, and obtains a new fresh reviewer.
-- `full`: use only for an explicit broad or high-risk exception. One selected Luna /
-  Max or Luna / High implementer executes the complete specification, the root
-  verifies, and a fresh read-only Sol / High reviewer inspects the accumulated diff.
-  On `fix-first`, the selected implementer handles the correction, the root
+  the accumulated diff. Prefer it for ambiguity, material risk, or judgment-heavy work.
+  Spawn no implementer. On `fix-first`, the root implements the correction, re-verifies,
+  and obtains a new fresh reviewer.
+- `full`: use only for an explicit broad or high-risk exception with settled architecture
+  and acceptance criteria. One selected Luna / High or Luna / Max implementer executes
+  the complete specification, the root verifies, and a fresh read-only Sol / High
+  reviewer inspects the accumulated diff.
+  On `fix-first`, the selected implementer handles a correction within the settled
+  spec; if Sol / High has taken over implementation, the root handles it. The root
   re-verifies, and a new fresh reviewer inspects the result.
 
-Auxiliary work substitutes for root work; it must not duplicate it. A route can
-escalate only with newly observed, recorded risk; it never silently downgrades.
+Auxiliary work substitutes for root work; it must not duplicate it. If a worker reveals
+unsettled architecture, ambiguity, or material risk, Sol / High takes over implementation.
+Declare the changed route and evidence. Never silently omit review commitments.
 Solo and delegate have no fresh reviewer or review-driven correction unless a newly
 observed, risk-evidenced route escalation is declared; never silently add one.
 
-## Luna / Max - bounded delegate/full implementation lane
+## Luna / High - default bounded delegate/full implementation lane
 
-Use this lane only when a declared delegate or full route selects it for bounded,
-fully specified work. The installed role pins GPT-6 Luna at max reasoning. It must
-surface ambiguity and failed checks rather than redesigning the architecture. A first
-result that demonstrates newly observed judgment-heavy, high-risk, wide-blast-radius,
-or misclassified work may justify a declared Luna / High escalation; do not force a
-retry first. If the specification itself was incomplete or wrong, return a precise
-correction for one corrected Luna / Max attempt. That retry is not a prerequisite for
-Luna / High.
+Use this lane for bounded, fully specified work. The installed role pins GPT-6 Luna
+at high reasoning. It must surface ambiguity and failed checks rather than redesigning
+the architecture. A first result showing only a need for deeper technical reasoning
+may justify Luna / Max. Judgment-heavy or high-risk decisions return to Sol / High.
+If the specification itself was incomplete or wrong, correct it before another attempt.
 
 Spawn exactly:
 
@@ -128,18 +130,17 @@ constraint, and surface ambiguity instead of redesigning the architecture.
 <paste and complete the Shared implementation contract>
 ~~~
 
-## Luna / High - higher-risk delegate/full implementation lane
+## Luna / Max - exceptional deep technical implementation lane
 
-Use this lane only when a declared delegate or full route selects judgment-heavy,
-high-risk, context-heavy, or wide-blast-radius work, including risk revealed by a
-first Luna / Max result. The installed role pins GPT-6 Luna at high reasoning. A
-corrected Luna / Max attempt is reserved for a specification error and is not a
-prerequisite for Luna / High.
+Use this lane only when a declared delegate or full route selects bounded, fully
+specified work whose technical depth justifies extra reasoning time and usage. The
+installed role pins GPT-6 Luna at max reasoning. Do not use it to transfer unsettled
+architecture, ambiguous requirements, or material risk away from Sol / High.
 
 Spawn exactly:
 
 ~~~text
-agent_type: sol_advisor_luna_high_implementer
+agent_type: sol_advisor_luna_max_implementer
 fork_turns: none
 ~~~
 
@@ -147,9 +148,9 @@ Do not attach per-spawn model or reasoning fields. Prompt:
 
 ~~~text
 ROLE
-Act as Sol Advisor's explicit high-complexity escalation worker. Resolve the supplied
-specification within the settled architecture, preserve every stated interface and
-constraint, and surface ambiguity instead of redesigning the architecture.
+Act as Sol Advisor's exceptional deep-reasoning worker. Execute the bounded,
+fully specified work within the settled architecture, preserve every stated interface
+and constraint, and return ambiguous or high-risk decisions to Sol / High.
 
 <paste and complete the Shared implementation contract>
 ~~~

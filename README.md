@@ -15,7 +15,7 @@ I write [**Attention Heads**](https://attentionheads.substack.com/?utm_source=gi
 
 You need a current Codex CLI or ChatGPT desktop app with plugins enabled, GPT-6
 Sol / High for the primary session, native custom-agent support, and jq. GPT-6
-Luna / Max or Luna / High access is needed only when the selected route delegates.
+Luna / High or Luna / Max access is needed only when the selected route delegates.
 
 ~~~sh
 codex plugin marketplace add ikunxdlyj/sol-advisor --ref main
@@ -23,10 +23,11 @@ codex plugin add sol-advisor@sol-advisor
 plugin_dir="$(codex plugin list --json | jq -r '.installed[] | select(.pluginId == "sol-advisor@sol-advisor") | .source.path')" && test -n "$plugin_dir" && test "$plugin_dir" != null && test -d "$plugin_dir" && test -f "$plugin_dir/scripts/install-agents.sh" && sh "$plugin_dir/scripts/install-agents.sh"
 ~~~
 
-The companion installer verifies all three exact role files after installation. It is
-fail-closed: modified, unsafe, nonregular, symlinked, unknown, or differing files
-are left untouched. It does not edit Codex configuration. Start a fresh Codex task
-after installation so native roles are discovered.
+The companion installer verifies all three exact role files after installation and
+migrates exact earlier Sol Advisor roles. It is fail-closed: modified, unsafe,
+nonregular, symlinked, unknown, or differing files are left untouched. It does not
+edit Codex configuration. Start a fresh Codex task after installation so native roles
+are discovered.
 
 Use this one prompt in the new task:
 
@@ -45,19 +46,21 @@ acceptance.
 | Mode | Use it when | Delivery |
 |---|---|---|
 | `solo` | Default; risk is contained. | Root plans, implements, tests, and self-reviews. |
-| `delegate` | A complete spec is better executed by one implementer. | Luna / Max for bounded work, or Luna / High for judgment-heavy or high-risk work; root verifies. |
-| `audit` | Independent final scrutiny matters more than delegation. | Root implements; a fresh read-only Sol / High reviews. |
-| `full` | Explicit broad or high-risk exception. | One selected implementer, root verification, and a fresh Sol / High review. |
+| `delegate` | Bounded work with settled architecture and acceptance criteria. | Luna / High by default; Luna / Max only when deep technical reasoning justifies its added time and usage. Root verifies. |
+| `audit` | Ambiguous, judgment-heavy, or high-risk implementation needs fresh scrutiny. | Sol / High root implements; a fresh read-only Sol / High reviews. |
+| `full` | Explicit broad or high-risk exception with a bounded implementation spec. | One selected Luna implementer, root verification, and a fresh Sol / High review. |
 
 Solo is the default. One auxiliary is the default maximum; `full` is the explicit
 exception. Sol emits a `SELECTIVE ROUTE` declaration with the mode and concise risk
-rationale before the first task tool call. It can escalate only when newly observed
-risk justifies it and never silently downgrades.
+rationale before the first task tool call. If newly observed evidence changes who
+should implement or whether review is needed, Sol declares the revised route and
+reason. It never silently omits a promised review.
 
 ## What happens automatically
 
 Sol / High keeps architecture, decomposition, route selection, parent verification,
-escalation decisions, and acceptance in the primary task. Auxiliary work substitutes
+escalation decisions, and acceptance in the primary task. Ambiguous or materially
+risky implementation decisions stay with Sol / High. Auxiliary work substitutes
 for root work; it does not duplicate it. The root inspects the complete diff and
 reruns the requested checks. When the selected route includes a review, a fresh Sol /
 High reviewer returns ship, fix-first, or rethink; any fix requires a new review.

@@ -9,7 +9,7 @@ Usage: install-agents.sh [--target-dir PATH] [--check] [--check-role ROLE ...]
 
 Install Sol Advisor's three current GPT-6 custom-agent templates into the target
 directory. Normal mode migrates only exact byte-matching historical templates and
-retires the old high-risk role name only when that file is byte-exact. It never
+retires superseded role names only when each file is byte-exact. It never
 overwrites or removes a modified, nonregular, or symlinked destination.
 
 Without --target-dir, the target is "$CODEX_HOME/agents" when CODEX_HOME is already
@@ -17,9 +17,9 @@ set, otherwise "$HOME/.codex/agents".
 
 Options:
   --target-dir PATH  Explicit destination directory (absolute or relative).
-  --check            Verify Luna Max, Luna High, and Sol exactly; do not create,
+  --check            Verify Luna High, Luna Max, and Sol exactly; do not create,
                      replace, or remove anything.
-  --check-role ROLE  Verify only ROLE (luna-max, luna-high, or sol); repeatable and
+  --check-role ROLE  Verify only ROLE (luna-high, luna-max, or sol); repeatable and
                      implies --check. The historical luna and terra names remain
                      compatibility aliases. Unknown or missing roles fail safely.
   --help             Show this help text.
@@ -212,8 +212,8 @@ while [ "$#" -gt 0 ]; do
     --check-role)
       [ "$#" -ge 2 ] || fail "--check-role requires a role: luna-max, luna-high, or sol."
       case "$2" in
-        luna-max|luna) selected_role=luna-max ;;
-        luna-high|terra) selected_role=luna-high ;;
+        luna-high|luna) selected_role=luna-high ;;
+        luna-max|terra) selected_role=luna-max ;;
         sol) selected_role=sol ;;
         *) fail "unknown --check-role '$2'; expected luna-max, luna-high, or sol." ;;
       esac
@@ -241,15 +241,17 @@ case "$target_dir" in
 esac
 
 luna_file=sol-advisor-luna-implementer.toml
-high_file=sol-advisor-luna-high-implementer.toml
+max_file=sol-advisor-luna-max-implementer.toml
 sol_file=sol-advisor-sol-reviewer.toml
+retired_high_file=sol-advisor-luna-high-implementer.toml
 retired_terra_file=sol-advisor-terra-implementer.toml
 luna_template=$template_dir/$luna_file
-high_template=$template_dir/$high_file
+max_template=$template_dir/$max_file
 sol_template=$template_dir/$sol_file
 luna_destination=$target_dir/$luna_file
-high_destination=$target_dir/$high_file
+max_destination=$target_dir/$max_file
 sol_destination=$target_dir/$sol_file
+retired_high_destination=$target_dir/$retired_high_file
 retired_terra_destination=$target_dir/$retired_terra_file
 
 # Immutable byte digests calculated from previously shipped role files.
@@ -260,11 +262,13 @@ legacy_terra_v050_sha256=dc329fe87f6f6610c13157ec16432f91c79cf5a541ee3e7448f6afb
 legacy_luna_v060_sha256=12fa9180a292876e6731bc325779123bcd931c3caa902fbf90d676a31833be84
 legacy_terra_v060_sha256=77ed2f36bb149da5d9032230c3d6f5e5cd56b059b3fa5f59085249bba06e1f3a
 legacy_sol_v060_sha256=0333acf0ef562bcfebd06009ac09bd1dd8cbc04c4cf28e08e9e049bd8bf202d2
-luna_legacy_digests="$legacy_luna_sha256 $legacy_luna_v050_sha256 $legacy_luna_v060_sha256"
+legacy_luna_v070_sha256=df2244de46202513abd8451e3837122d47a7de82342e20853d06f7466c614295
+legacy_high_v070_sha256=c4d09eaf837973d729eeaf05d022da97fd9349123d857852e78816906479a705
+luna_legacy_digests="$legacy_luna_sha256 $legacy_luna_v050_sha256 $legacy_luna_v060_sha256 $legacy_luna_v070_sha256"
 terra_legacy_digests="$legacy_terra_sha256 $legacy_terra_v050_sha256 $legacy_terra_v060_sha256"
 sol_legacy_digests=$legacy_sol_v060_sha256
 
-for template in "$luna_template" "$high_template" "$sol_template"; do
+for template in "$luna_template" "$max_template" "$sol_template"; do
   [ -f "$template" ] && [ ! -L "$template" ] ||
     fail "shipped template is missing or not a regular file: $template"
 done
@@ -277,20 +281,23 @@ if path_exists "$target_dir"; then
 fi
 
 luna_state=$(classify_current_or_legacy "$luna_destination" "$luna_template" "$luna_legacy_digests")
-high_state=$(classify_current_or_legacy "$high_destination" "$high_template" '')
+max_state=$(classify_current_or_legacy "$max_destination" "$max_template" '')
 sol_state=$(classify_current_or_legacy "$sol_destination" "$sol_template" "$sol_legacy_digests")
+retired_high_state=$(classify_retired "$retired_high_destination" "$legacy_high_v070_sha256")
 retired_terra_state=$(classify_retired "$retired_terra_destination" "$terra_legacy_digests")
 
 if [ "$check_only" -eq 1 ]; then
-  if role_selected luna-max; then
-    [ "$luna_state" = current ] ||
-      report_preflight_error "Luna Max template is $luna_state, not the current exact file: $luna_destination"
-  fi
   if role_selected luna-high; then
-    [ "$high_state" = current ] ||
-      report_preflight_error "Luna High template is $high_state, not the current exact file: $high_destination"
+    [ "$luna_state" = current ] ||
+      report_preflight_error "Luna High template is $luna_state, not the current exact file: $luna_destination"
+  fi
+  if role_selected luna-max; then
+    [ "$max_state" = current ] ||
+      report_preflight_error "Luna Max template is $max_state, not the current exact file: $max_destination"
+    [ "$retired_high_state" = missing ] ||
+      report_preflight_error "retired Luna High role is $retired_high_state, not absent: $retired_high_destination"
     [ "$retired_terra_state" = missing ] ||
-      report_preflight_error "retired high-risk role is $retired_terra_state, not absent: $retired_terra_destination"
+      report_preflight_error "retired Terra role is $retired_terra_state, not absent: $retired_terra_destination"
   fi
   if role_selected sol; then
     [ "$sol_state" = current ] ||
@@ -299,15 +306,19 @@ if [ "$check_only" -eq 1 ]; then
 else
   case "$luna_state" in
     current|legacy|missing) ;;
-    *) report_preflight_error "Luna Max destination is $luna_state and will not be replaced: $luna_destination" ;;
+    *) report_preflight_error "Luna High destination is $luna_state and will not be replaced: $luna_destination" ;;
   esac
-  case "$high_state" in
+  case "$max_state" in
     current|missing) ;;
-    *) report_preflight_error "Luna High destination is $high_state and will not be replaced: $high_destination" ;;
+    *) report_preflight_error "Luna Max destination is $max_state and will not be replaced: $max_destination" ;;
   esac
   case "$sol_state" in
     current|legacy|missing) ;;
     *) report_preflight_error "Sol destination is $sol_state and will not be replaced: $sol_destination" ;;
+  esac
+  case "$retired_high_state" in
+    legacy|missing) ;;
+    *) report_preflight_error "retired Luna High destination is $retired_high_state and will not be removed: $retired_high_destination" ;;
   esac
   case "$retired_terra_state" in
     legacy|missing) ;;
@@ -321,7 +332,7 @@ if [ "$check_only" -eq 1 ]; then
   if [ -n "$check_roles" ]; then
     printf '%s\n' "CHECK PASSED: selected role templates exactly match $template_dir."
   else
-    printf '%s\n' "CHECK PASSED: Luna Max, Luna High, and Sol exactly match $template_dir."
+    printf '%s\n' "CHECK PASSED: Luna High, Luna Max, and Sol exactly match $template_dir."
   fi
   exit 0
 fi
@@ -332,26 +343,32 @@ fi
 [ -d "$target_dir" ] && [ ! -L "$target_dir" ] ||
   fail "target directory changed after preflight: $target_dir"
 
-same_state "Luna Max" "$luna_state" "$(classify_current_or_legacy "$luna_destination" "$luna_template" "$luna_legacy_digests")"
-same_state "Luna High" "$high_state" "$(classify_current_or_legacy "$high_destination" "$high_template" '')"
+same_state "Luna High" "$luna_state" "$(classify_current_or_legacy "$luna_destination" "$luna_template" "$luna_legacy_digests")"
+same_state "Luna Max" "$max_state" "$(classify_current_or_legacy "$max_destination" "$max_template" '')"
 same_state Sol "$sol_state" "$(classify_current_or_legacy "$sol_destination" "$sol_template" "$sol_legacy_digests")"
+same_state "retired Luna High role" "$retired_high_state" "$(classify_retired "$retired_high_destination" "$legacy_high_v070_sha256")"
 same_state "retired high-risk role" "$retired_terra_state" "$(classify_retired "$retired_terra_destination" "$terra_legacy_digests")"
 
 case "$luna_state" in
   missing) install_missing "$luna_template" "$luna_destination" ;;
-  legacy) replace_legacy_role "Luna Max" "$luna_template" "$luna_destination" "$luna_legacy_digests" ;;
+  legacy) replace_legacy_role "Luna High" "$luna_template" "$luna_destination" "$luna_legacy_digests" ;;
   current) printf '%s\n' "ALREADY CURRENT: $luna_destination" ;;
 esac
 
-case "$high_state" in
-  missing) install_missing "$high_template" "$high_destination" ;;
-  current) printf '%s\n' "ALREADY CURRENT: $high_destination" ;;
+case "$max_state" in
+  missing) install_missing "$max_template" "$max_destination" ;;
+  current) printf '%s\n' "ALREADY CURRENT: $max_destination" ;;
 esac
 
 case "$sol_state" in
   missing) install_missing "$sol_template" "$sol_destination" ;;
   legacy) replace_legacy_role Sol "$sol_template" "$sol_destination" "$sol_legacy_digests" ;;
   current) printf '%s\n' "ALREADY CURRENT: $sol_destination" ;;
+esac
+
+case "$retired_high_state" in
+  legacy) retire_legacy_role "v0.7 Luna High role" "$retired_high_destination" "$legacy_high_v070_sha256" ;;
+  missing) ;;
 esac
 
 case "$retired_terra_state" in
@@ -361,11 +378,13 @@ esac
 
 [ "$(classify_current_or_legacy "$luna_destination" "$luna_template" "$luna_legacy_digests")" = current ] ||
   fail "post-install exactness check failed: $luna_destination"
-[ "$(classify_current_or_legacy "$high_destination" "$high_template" '')" = current ] ||
-  fail "post-install exactness check failed: $high_destination"
+[ "$(classify_current_or_legacy "$max_destination" "$max_template" '')" = current ] ||
+  fail "post-install exactness check failed: $max_destination"
 [ "$(classify_current_or_legacy "$sol_destination" "$sol_template" "$sol_legacy_digests")" = current ] ||
   fail "post-install exactness check failed: $sol_destination"
+[ "$(classify_retired "$retired_high_destination" "$legacy_high_v070_sha256")" = missing ] ||
+  fail "post-install retirement check failed: $retired_high_destination"
 [ "$(classify_retired "$retired_terra_destination" "$terra_legacy_digests")" = missing ] ||
   fail "post-install retirement check failed: $retired_terra_destination"
 
-printf '%s\n' "INSTALL PASSED: Luna Max, Luna High, and Sol exactly match $template_dir."
+printf '%s\n' "INSTALL PASSED: Luna High, Luna Max, and Sol exactly match $template_dir."
