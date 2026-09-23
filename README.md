@@ -13,12 +13,12 @@ I write [**Attention Heads**](https://attentionheads.substack.com/?utm_source=gi
 
 ## Quick start
 
-You need a current Codex CLI or ChatGPT desktop app with plugins enabled, GPT-5.6
-Sol / High for the primary session, native custom-agent support, and jq. GPT-5.6
-Luna / Max or Terra / High access is needed only when the selected route delegates.
+You need a current Codex CLI or ChatGPT desktop app with plugins enabled, GPT-6
+Sol / High for the primary session, native custom-agent support, and jq. GPT-6
+Luna / Max or Luna / High access is needed only when the selected route delegates.
 
 ~~~sh
-codex plugin marketplace add DannyMac180/sol-advisor --ref main
+codex plugin marketplace add ikunxdlyj/sol-advisor --ref main
 codex plugin add sol-advisor@sol-advisor
 plugin_dir="$(codex plugin list --json | jq -r '.installed[] | select(.pluginId == "sol-advisor@sol-advisor") | .source.path')" && test -n "$plugin_dir" && test "$plugin_dir" != null && test -d "$plugin_dir" && test -f "$plugin_dir/scripts/install-agents.sh" && sh "$plugin_dir/scripts/install-agents.sh"
 ~~~
@@ -45,7 +45,7 @@ acceptance.
 | Mode | Use it when | Delivery |
 |---|---|---|
 | `solo` | Default; risk is contained. | Root plans, implements, tests, and self-reviews. |
-| `delegate` | A complete spec is better executed by one implementer. | Luna / Max for bounded work, or Terra / High for judgment-heavy or high-risk work; root verifies. |
+| `delegate` | A complete spec is better executed by one implementer. | Luna / Max for bounded work, or Luna / High for judgment-heavy or high-risk work; root verifies. |
 | `audit` | Independent final scrutiny matters more than delegation. | Root implements; a fresh read-only Sol / High reviews. |
 | `full` | Explicit broad or high-risk exception. | One selected implementer, root verification, and a fresh Sol / High review. |
 

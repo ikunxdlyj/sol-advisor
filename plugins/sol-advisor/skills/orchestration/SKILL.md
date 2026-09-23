@@ -17,7 +17,7 @@ preflight, runtime-evidence, isolation, and maintainer procedures.
 
 ## Confirm the primary session
 
-Run the primary Codex session on gpt-5.6-sol with high reasoning. Verify the current
+Run the primary Codex session on gpt-6-sol with high reasoning. Verify the current
 model and effort when runtime metadata exposes them. If either differs, tell the user
 to select Sol / High and stop before delegation. If runtime metadata does not expose
 them, ask the user to confirm Sol / High and stop until confirmed. A skill cannot
@@ -41,7 +41,7 @@ escalation. Details and the task-scoped preflight matrix are in operations.md.
 ## Preflight selected auxiliaries only
 
 Confirm Sol / High in the primary session. Preflight only an auxiliary selected by the
-declared route: none for solo; Luna / Max or Terra / High for delegate; fresh Sol / High
+declared route: none for solo; Luna / Max or Luna / High for delegate; fresh Sol / High
 for audit; and the selected implementer plus fresh Sol reviewer for full. Public metadata
 for role, model, and effort is authoritative. If it omits a model or effort, use the
 local inspector only for that omitted field. Missing, conflicting, unavailable, or
@@ -51,7 +51,7 @@ model, effort, or reviewer.
 ## Route delivery without duplication
 
 - `solo`: root plans, implements, tests, and self-reviews; spawn no auxiliary.
-- `delegate`: select Luna / Max for bounded, fully specified work, or Terra / High for
+- `delegate`: select Luna / Max for bounded, fully specified work, or Luna / High for
   judgment-heavy, high-risk, context-heavy, or wide-blast-radius work. The selected
   implementer executes the complete spec; root verifies; do not request a fresh review.
 - `audit`: root implements and verifies; a fresh read-only Sol / High reviewer reviews
@@ -59,11 +59,11 @@ model, effort, or reviewer.
 - `full`: only for an explicit broad or high-risk exception. Select one implementer,
   root verifies, then a fresh read-only Sol / High reviewer reviews.
 
-Auxiliary work must substitute for root work, not duplicate it. A Luna result may
-justify escalation to Terra / High only when it reveals newly observed complexity,
-risk, wide blast radius, or misclassification. A corrected Luna attempt is reserved
-for a specification error and is not a prerequisite for Terra. Any route change must
-be declared and evidenced; do not silently downgrade.
+Auxiliary work must substitute for root work, not duplicate it. A Luna / Max result may
+justify escalation to Luna / High only when it reveals newly observed complexity,
+risk, wide blast radius, or misclassification. A corrected Luna / Max attempt is
+reserved for a specification error and is not a prerequisite for Luna / High. Any
+route change must be declared and evidenced; do not silently downgrade.
 
 ## Keep architect work in the primary session
 

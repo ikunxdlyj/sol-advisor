@@ -10,9 +10,9 @@ The installed TOMLs are the source of truth:
 
 | Role type | Model | Effort | Use |
 |---|---|---|---|
-| sol_advisor_luna_implementer | gpt-5.6-luna | max | Delegate/full bounded routine implementation |
-| sol_advisor_terra_implementer | gpt-5.6-terra | high | Delegate/full judgment-heavy or high-risk implementation |
-| sol_advisor_sol_reviewer | gpt-5.6-sol | high | Audit/full fresh review; requests read-only sandbox |
+| sol_advisor_luna_implementer | gpt-6-luna | max | Delegate/full bounded routine implementation |
+| sol_advisor_luna_high_implementer | gpt-6-luna | high | Delegate/full judgment-heavy or high-risk implementation |
+| sol_advisor_sol_reviewer | gpt-6-sol | high | Audit/full fresh review; requests read-only sandbox |
 
 Native spawn requests name the role and use a fresh context:
 
@@ -21,10 +21,10 @@ agent_type: sol_advisor_luna_implementer
 fork_turns: none
 ~~~
 
-Use the Terra type only when the selected delegate or full route needs it:
+Use the Luna High type only when the selected delegate or full route needs it:
 
 ~~~text
-agent_type: sol_advisor_terra_implementer
+agent_type: sol_advisor_luna_high_implementer
 fork_turns: none
 ~~~
 
@@ -61,9 +61,11 @@ sh "$installer" --check
 ~~~
 
 The installer is fail-closed and performs its own post-install exactness check. It
-recognizes only byte-exact historical templates, including the shipped v0.2.0 profiles
-and the v0.5.0 Luna/Terra profiles during a v0.5.1 update. Modified/unsafe/nonregular/
-symlinked/conflicting destinations remain refusals, and all mutations are preflighted.
+recognizes only byte-exact historical templates, including the shipped v0.2.0,
+v0.5.0, and v0.6.0 profiles. During the v0.7.0 upgrade it replaces the model pins and
+retires the old high-risk role name only when that installed file is byte-exact.
+Modified, unsafe, nonregular, symlinked, or conflicting destinations remain refusals,
+and all mutations are preflighted.
 
 The root emits one machine-auditable declaration before its first task tool call:
 
@@ -85,16 +87,16 @@ fail-closed:
 | Route | Required companion checks |
 |---|---|
 | solo | None |
-| delegate (Luna) | `--check --check-role luna` |
-| delegate (Terra) | `--check --check-role terra` |
+| delegate (Luna Max) | `--check --check-role luna-max` |
+| delegate (Luna High) | `--check --check-role luna-high` |
 | audit | `--check --check-role sol` |
-| full (Luna) | `--check --check-role luna --check-role sol` |
-| full (Terra) | `--check --check-role terra --check-role sol` |
+| full (Luna Max) | `--check --check-role luna-max --check-role sol` |
+| full (Luna High) | `--check --check-role luna-high --check-role sol` |
 
 For example:
 
 ~~~sh
-sh plugins/sol-advisor/scripts/install-agents.sh --check --check-role luna
+sh plugins/sol-advisor/scripts/install-agents.sh --check --check-role luna-max
 sh plugins/sol-advisor/scripts/install-agents.sh --check --check-role sol
 ~~~
 
@@ -103,11 +105,11 @@ check ignores unselected role destinations, while the all-role --check behavior
 remains unchanged. Cache successful checks only for the task; never carry them across
 later tasks, installation/update, or routing/configuration changes.
 
-Luna / Max is for bounded, fully specified work. Terra / High is selected for
-judgment-heavy, high-risk, context-heavy, or wide-blast-radius work. A Luna result
-may justify a declared Terra escalation only when it shows newly observed risk. One
-corrected Luna attempt is reserved for a specification error and is not a prerequisite
-for Terra.
+Luna / Max is for bounded, fully specified work. Luna / High is selected for
+judgment-heavy, high-risk, context-heavy, or wide-blast-radius work. A Luna / Max
+result may justify a declared Luna / High escalation only when it shows newly observed
+risk. One corrected Luna / Max attempt is reserved for a specification error and is
+not a prerequisite for Luna / High.
 
 If public metadata omits model or effort, use the local inspector below as a fallback
 for those omitted fields only. Do not use it to replace available public evidence.
@@ -136,7 +138,7 @@ conflicting model/effort/sandbox/permission/working-directory values. It never p
 prompts, messages, environment variables, tokens, configuration, or arbitrary rollout
 payloads.
 
-Accepted routing is Luna / max for bounded delegate/full implementation, Terra / high
+Accepted routing is Luna / max for bounded delegate/full implementation, Luna / high
 for higher-risk delegate/full implementation, and Sol / high for audit/full review.
 If public and local evidence both exist, they must agree. The local inspector is not a
 model-selection fallback.
@@ -158,7 +160,7 @@ verdict; parent verification and a new fresh review are required.
 
 ## Worker packet and parent acceptance
 
-Every Luna or Terra prompt uses the five-part packet in role-contracts.md:
+Every Luna / Max or Luna / High prompt uses the five-part packet in role-contracts.md:
 
 - OBJECTIVE
 - FILES AND OWNERSHIP
@@ -171,7 +173,7 @@ complete diff inspection, verification reruns, correction/escalation decisions, 
 acceptance. Worker claims never replace direct inspection.
 
 In solo, the root plans, implements, tests, and self-reviews with no auxiliary. In
-delegate, one selected Luna or Terra implementer completes the spec and the root
+delegate, one selected Luna implementer completes the spec and the root
 verifies with no fresh reviewer. In audit, the root implements and verifies, then a
 fresh Sol reviewer reviews. In full, one selected implementer completes the spec, the
 root verifies, and a fresh Sol reviewer reviews. Auxiliary work substitutes for root
@@ -188,6 +190,7 @@ git status --short
 git diff --stat
 ~~~
 
-The verifier covers the v0.6.0 manifest, exact three-role TOMLs, selective-routing
-contracts, concise README journey, absence of retired workflow references, installer
-safety fixtures, Luna runtime evidence, JSON/TOML validity, and shell syntax.
+The verifier covers the v0.7.0 manifest, exact GPT-6 three-role TOMLs,
+selective-routing contracts, concise README journey, absence of retired active routes,
+safe historical migration, installer refusal fixtures, Luna runtime evidence,
+JSON/TOML validity, and shell syntax.
