@@ -7,7 +7,7 @@ usage() {
   cat <<'EOF'
 Usage: install-agents.sh [--target-dir PATH] [--check] [--check-role ROLE ...]
 
-Install Sol Advisor's three current GPT-6 custom-agent templates into the target
+Install Sol Advisor's three current GPT-6-family custom-agent templates into the target
 directory. Normal mode migrates only exact byte-matching historical templates and
 retires superseded role names only when each file is byte-exact. It never
 overwrites or removes a modified, nonregular, or symlinked destination.
@@ -52,7 +52,14 @@ path_exists() {
 }
 
 sha256_file() {
-  shasum -a 256 "$1" 2>/dev/null | awk 'NF >= 1 && length($1) == 64 { print $1; exit }'
+  if command -v shasum >/dev/null 2>&1; then
+    checksum=$(shasum -a 256 "$1" 2>/dev/null || true)
+  elif command -v sha256sum >/dev/null 2>&1; then
+    checksum=$(sha256sum "$1" 2>/dev/null || true)
+  else
+    checksum=''
+  fi
+  printf '%s\n' "$checksum" | awk 'NF >= 1 && length($1) == 64 { print $1; exit }'
 }
 
 digest_is_allowed() {
@@ -262,11 +269,16 @@ legacy_terra_v050_sha256=dc329fe87f6f6610c13157ec16432f91c79cf5a541ee3e7448f6afb
 legacy_luna_v060_sha256=12fa9180a292876e6731bc325779123bcd931c3caa902fbf90d676a31833be84
 legacy_terra_v060_sha256=77ed2f36bb149da5d9032230c3d6f5e5cd56b059b3fa5f59085249bba06e1f3a
 legacy_sol_v060_sha256=0333acf0ef562bcfebd06009ac09bd1dd8cbc04c4cf28e08e9e049bd8bf202d2
+legacy_luna_v060_crlf_sha256=000ff8bed7f94f77a460fb81424d51233eb6146db5b21a346068aceb6a9abe27
+legacy_terra_v060_crlf_sha256=7c9497c46207007565f72ac9bac6ce4954a1491914e4d64b44e27e4c27e8cd43
+legacy_sol_v060_crlf_sha256=6ac63677bcc8677a9a743522cf06696c8edb1b005a61430e0fc8fa62e18dc355
 legacy_luna_v070_sha256=df2244de46202513abd8451e3837122d47a7de82342e20853d06f7466c614295
 legacy_high_v070_sha256=c4d09eaf837973d729eeaf05d022da97fd9349123d857852e78816906479a705
-luna_legacy_digests="$legacy_luna_sha256 $legacy_luna_v050_sha256 $legacy_luna_v060_sha256 $legacy_luna_v070_sha256"
-terra_legacy_digests="$legacy_terra_sha256 $legacy_terra_v050_sha256 $legacy_terra_v060_sha256"
-sol_legacy_digests=$legacy_sol_v060_sha256
+legacy_sol_v080_sha256=18cb3a5c08eb3f103f07626c944b9ba8978b20c5a706cf4579e07a5fded18e0a
+legacy_sol_v080_crlf_sha256=4238b91b1e1dde1d93282a0bb4586361e8c3f0690c48397f98df04eccf42b384
+luna_legacy_digests="$legacy_luna_sha256 $legacy_luna_v050_sha256 $legacy_luna_v060_sha256 $legacy_luna_v060_crlf_sha256 $legacy_luna_v070_sha256"
+terra_legacy_digests="$legacy_terra_sha256 $legacy_terra_v050_sha256 $legacy_terra_v060_sha256 $legacy_terra_v060_crlf_sha256"
+sol_legacy_digests="$legacy_sol_v060_sha256 $legacy_sol_v060_crlf_sha256 $legacy_sol_v080_sha256 $legacy_sol_v080_crlf_sha256"
 
 for template in "$luna_template" "$max_template" "$sol_template"; do
   [ -f "$template" ] && [ ! -L "$template" ] ||

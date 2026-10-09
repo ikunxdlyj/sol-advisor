@@ -12,7 +12,7 @@ The installed TOMLs are the source of truth:
 |---|---|---|---|
 | sol_advisor_luna_implementer | gpt-6-luna | high | Delegate/full bounded routine implementation |
 | sol_advisor_luna_max_implementer | gpt-6-luna | max | Delegate/full bounded, fully specified deep technical work |
-| sol_advisor_sol_reviewer | gpt-6-sol | high | Audit/full fresh review; requests read-only sandbox |
+| sol_advisor_sol_reviewer | gpt-6.1-sol | high | Audit/full fresh review; requests read-only sandbox |
 
 Native spawn requests name the role and use a fresh context:
 
@@ -29,7 +29,7 @@ agent_type: sol_advisor_luna_max_implementer
 fork_turns: none
 ~~~
 
-Use a fresh Sol reviewer only for audit or full after parent verification:
+Use a fresh GPT-6.1 Sol reviewer only for audit or full after parent verification:
 
 ~~~text
 agent_type: sol_advisor_sol_reviewer
@@ -41,7 +41,7 @@ unobservable role/model/effort is a hard stop; never substitute another role.
 
 ## Selective route declaration, preflight, and caching
 
-The primary session must be Sol / High. Companion installation is separate from task
+The primary session must be GPT-6.1 Sol / High. Companion installation is separate from task
 routing because plugin installation does not register user-owned TOMLs.
 
 At installation or update time, run the repository-relative installer and its exactness
@@ -63,9 +63,11 @@ sh "$installer" --check
 
 The installer is fail-closed and performs its own post-install exactness check. It
 recognizes only byte-exact historical templates, including the shipped v0.2.0,
-v0.5.0, v0.6.0, and v0.7.0 profiles. During the v0.8.0 upgrade it changes the routine
-Luna pin to High, installs the bounded deep-work Luna / Max role, and retires the
-old Luna High role name only when that installed file is byte-exact.
+v0.5.0, v0.6.0, v0.7.0, and v0.8.0 profiles. The v0.8.0 upgrade changed the routine
+Luna pin to High, installed the bounded deep-work Luna / Max role, and retired the
+old Luna High role name only when that installed file was byte-exact. The v0.9.0
+upgrade changes the reviewer pin to GPT-6.1 Sol / High. It recognizes both LF and
+CRLF copies of the v0.8.0 reviewer role.
 Modified, unsafe, nonregular, symlinked, or conflicting destinations remain refusals,
 and all mutations are preflighted.
 
@@ -111,7 +113,7 @@ Luna / High is the default for bounded, fully specified work. Luna / Max is sele
 only when the architecture and acceptance criteria are settled and technical depth
 matters more than speed or usage. A Luna / High result may justify Luna / Max when
 it reveals that narrow need. Ambiguity, material risk, or architecture changes require
-Sol / High to take over implementation. A specification error is corrected before
+GPT-6.1 Sol / High to take over implementation. A specification error is corrected before
 another attempt.
 
 If public metadata omits model or effort, use the local inspector below as a fallback
@@ -142,8 +144,8 @@ prompts, messages, environment variables, tokens, configuration, or arbitrary ro
 payloads.
 
 Accepted routing is Luna / high for routine bounded delegate/full implementation,
-Luna / max for exceptional bounded deep technical work, and Sol / high for audit/full
-review. Judgment-heavy or high-risk implementation stays with the primary Sol / High.
+Luna / max for exceptional bounded deep technical work, and GPT-6.1 Sol / high for audit/full
+review. Judgment-heavy or high-risk implementation stays with the primary GPT-6.1 Sol / High.
 If public and local evidence both exist, they must agree. The local inspector is not a
 model-selection fallback.
 
@@ -179,9 +181,9 @@ acceptance. Worker claims never replace direct inspection.
 In solo, the root plans, implements, tests, and self-reviews with no auxiliary. In
 delegate, one selected Luna implementer completes a settled spec and the root
 verifies with no fresh reviewer by default. In audit, the root implements and verifies,
-then a fresh Sol reviewer reviews. In full, a bounded implementer completes the spec,
-the root verifies, and a fresh Sol reviewer reviews. If a worker reveals ambiguity or
-material risk, Sol / High takes over and keeps the promised review. Auxiliary work
+then a fresh GPT-6.1 Sol reviewer reviews. In full, a bounded implementer completes the spec,
+the root verifies, and a fresh GPT-6.1 Sol reviewer reviews. If a worker reveals ambiguity or
+material risk, GPT-6.1 Sol / High takes over and keeps the promised review. Auxiliary work
 substitutes for root work; it does not duplicate it. A reviewer never fixes its own
 findings.
 
@@ -196,7 +198,7 @@ git status --short
 git diff --stat
 ~~~
 
-The verifier covers the v0.8.0 manifest, exact GPT-6 three-role TOMLs,
+The verifier covers the v0.9.0 manifest, exact GPT-6-family three-role TOMLs,
 selective-routing contracts, concise README journey, absence of retired active routes,
 safe historical migration, installer refusal fixtures, Luna runtime evidence,
 JSON/TOML validity, and shell syntax.

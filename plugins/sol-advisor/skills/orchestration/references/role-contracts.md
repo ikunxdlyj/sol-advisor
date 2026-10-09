@@ -21,9 +21,9 @@ Solo is the default; one auxiliary is the default maximum. Full is an explicit b
 or high-risk exception. Declare any change of implementer or review commitment with
 the newly observed evidence. Never silently omit a promised review.
 
-Confirm Sol / High in the primary session, then preflight only auxiliaries selected by
-the route: none for solo; Luna / High or Luna / Max for delegate; fresh Sol / High
-for audit; and one selected implementer plus fresh Sol reviewer for full. Cache each
+Confirm GPT-6.1 Sol / High in the primary session, then preflight only auxiliaries selected by
+the route: none for solo; Luna / High or Luna / Max for delegate; fresh GPT-6.1 Sol / High
+for audit; and one selected implementer plus fresh GPT-6.1 Sol reviewer for full. Cache each
 successful check only for the task. After spawning, complete the selected role's
 routing and reviewer-isolation checks before accepting the result:
 
@@ -31,7 +31,7 @@ routing and reviewer-isolation checks before accepting the result:
 2. Observe the selected role, model, and effort through public spawn/details metadata
    first, using the local runtime inspector only for omitted fields. Accept Luna /
    High for routine delegate/full implementation, Luna / Max only for bounded,
-   fully specified deep technical work, and Sol / High for audit/full review.
+   fully specified deep technical work, and GPT-6.1 Sol / High for audit/full review.
 3. For the reviewer, capture actual sandbox policy and permission profile types.
 
 A missing, stale, unsafe, conflicting, unavailable, inconsistent, or unobservable
@@ -86,20 +86,20 @@ The primary session must inspect the diff and rerun verification itself.
 - `delegate`: one selected Luna / High implementer executes the complete five-part
   specification; use Luna / Max only for bounded, fully specified deep technical
   work. The root verifies. Do not spawn a fresh reviewer by default.
-- `audit`: root implements and verifies. A fresh read-only Sol / High reviewer inspects
+- `audit`: root implements and verifies. A fresh read-only GPT-6.1 Sol / High reviewer inspects
   the accumulated diff. Prefer it for ambiguity, material risk, or judgment-heavy work.
   Spawn no implementer. On `fix-first`, the root implements the correction, re-verifies,
   and obtains a new fresh reviewer.
 - `full`: use only for an explicit broad or high-risk exception with settled architecture
   and acceptance criteria. One selected Luna / High or Luna / Max implementer executes
-  the complete specification, the root verifies, and a fresh read-only Sol / High
+  the complete specification, the root verifies, and a fresh read-only GPT-6.1 Sol / High
   reviewer inspects the accumulated diff.
   On `fix-first`, the selected implementer handles a correction within the settled
-  spec; if Sol / High has taken over implementation, the root handles it. The root
+  spec; if GPT-6.1 Sol / High has taken over implementation, the root handles it. The root
   re-verifies, and a new fresh reviewer inspects the result.
 
 Auxiliary work substitutes for root work; it must not duplicate it. If a worker reveals
-unsettled architecture, ambiguity, or material risk, Sol / High takes over implementation.
+unsettled architecture, ambiguity, or material risk, GPT-6.1 Sol / High takes over implementation.
 Declare the changed route and evidence. Never silently omit review commitments.
 Solo and delegate have no fresh reviewer or review-driven correction unless a newly
 observed, risk-evidenced route escalation is declared; never silently add one.
@@ -109,7 +109,7 @@ observed, risk-evidenced route escalation is declared; never silently add one.
 Use this lane for bounded, fully specified work. The installed role pins GPT-6 Luna
 at high reasoning. It must surface ambiguity and failed checks rather than redesigning
 the architecture. A first result showing only a need for deeper technical reasoning
-may justify Luna / Max. Judgment-heavy or high-risk decisions return to Sol / High.
+may justify Luna / Max. Judgment-heavy or high-risk decisions return to GPT-6.1 Sol / High.
 If the specification itself was incomplete or wrong, correct it before another attempt.
 
 Spawn exactly:
@@ -135,7 +135,7 @@ constraint, and surface ambiguity instead of redesigning the architecture.
 Use this lane only when a declared delegate or full route selects bounded, fully
 specified work whose technical depth justifies extra reasoning time and usage. The
 installed role pins GPT-6 Luna at max reasoning. Do not use it to transfer unsettled
-architecture, ambiguous requirements, or material risk away from Sol / High.
+architecture, ambiguous requirements, or material risk away from GPT-6.1 Sol / High.
 
 Spawn exactly:
 
@@ -150,12 +150,12 @@ Do not attach per-spawn model or reasoning fields. Prompt:
 ROLE
 Act as Sol Advisor's exceptional deep-reasoning worker. Execute the bounded,
 fully specified work within the settled architecture, preserve every stated interface
-and constraint, and return ambiguous or high-risk decisions to Sol / High.
+and constraint, and return ambiguous or high-risk decisions to GPT-6.1 Sol / High.
 
 <paste and complete the Shared implementation contract>
 ~~~
 
-## Fresh Sol / High - requested-read-only audit/full reviewer
+## Fresh GPT-6.1 Sol / High - requested-read-only audit/full reviewer
 
 Only for an audit or full route, after parent verification, spawn a new native thread
 exactly:
@@ -165,7 +165,7 @@ agent_type: sol_advisor_sol_reviewer
 fork_turns: none
 ~~~
 
-The installed role pins Sol / High and requests a read-only sandbox. Do not attach
+The installed role pins GPT-6.1 Sol / High and requests a read-only sandbox. Do not attach
 per-spawn model or reasoning fields. Observe the actual role, pin, sandbox policy, and
 permission profile before accepting its verdict.
 
@@ -201,7 +201,7 @@ RESIDUAL RISK: <most important remaining risk, or none>
 ~~~
 
 If any fix is made after review, discard the verdict and run a new fresh review.
-Sol reviewing Sol is context-clean, not cross-model-family independence.
+GPT-6.1 Sol reviewing GPT-6.1 Sol is context-clean, not cross-model-family independence.
 
 Use observed isolation, not requested isolation:
 

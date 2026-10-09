@@ -48,8 +48,13 @@ legacy_terra_v050_sha256=dc329fe87f6f6610c13157ec16432f91c79cf5a541ee3e7448f6afb
 legacy_luna_v060_sha256=12fa9180a292876e6731bc325779123bcd931c3caa902fbf90d676a31833be84
 legacy_terra_v060_sha256=77ed2f36bb149da5d9032230c3d6f5e5cd56b059b3fa5f59085249bba06e1f3a
 legacy_sol_v060_sha256=0333acf0ef562bcfebd06009ac09bd1dd8cbc04c4cf28e08e9e049bd8bf202d2
+legacy_luna_v060_crlf_sha256=000ff8bed7f94f77a460fb81424d51233eb6146db5b21a346068aceb6a9abe27
+legacy_terra_v060_crlf_sha256=7c9497c46207007565f72ac9bac6ce4954a1491914e4d64b44e27e4c27e8cd43
+legacy_sol_v060_crlf_sha256=6ac63677bcc8677a9a743522cf06696c8edb1b005a61430e0fc8fa62e18dc355
 legacy_luna_v070_sha256=df2244de46202513abd8451e3837122d47a7de82342e20853d06f7466c614295
 legacy_high_v070_sha256=c4d09eaf837973d729eeaf05d022da97fd9349123d857852e78816906479a705
+legacy_sol_v080_sha256=18cb3a5c08eb3f103f07626c944b9ba8978b20c5a706cf4579e07a5fded18e0a
+legacy_sol_v080_crlf_sha256=4238b91b1e1dde1d93282a0bb4586361e8c3f0690c48397f98df04eccf42b384
 
 snapshot_files() {
   target=$1
@@ -305,16 +310,17 @@ pass "required files present and retired contract absent"
 
 jq empty "$manifest"
 manifest_version=$(jq -r '.version' "$manifest")
-printf '%s\n' "$manifest_version" | grep -Eq '^0\.8\.0(\+codex\.[A-Za-z0-9][A-Za-z0-9._-]*)?$' ||
-  fail "manifest version is neither 0.8.0 nor a valid 0.8.0 Codex cachebuster"
+printf '%s\n' "$manifest_version" | grep -Eq '^0\.9\.0(\+codex\.[A-Za-z0-9][A-Za-z0-9._-]*)?$' ||
+  fail "manifest version is neither 0.9.0 nor a valid 0.9.0 Codex cachebuster"
+grep -Fq 'GPT-6.1 Sol / High in the primary session' "$manifest" || fail "manifest omits the GPT-6.1 Sol primary"
 grep -Fq 'SELECTIVE ROUTE' "$manifest" || fail "manifest omits route declaration"
 grep -Fq 'solo is the default' "$manifest" || fail "manifest omits solo default"
 grep -Fq 'delegate uses native GPT-6 Luna / High' "$manifest" || fail "manifest omits routine delegate role contract"
 grep -Fq 'GPT-6 Luna / Max only for fully specified deep technical work' "$manifest" || fail "manifest omits exceptional deep-work contract"
-grep -Fq 'audit uses a fresh read-only GPT-6 Sol / High review' "$manifest" || fail "manifest omits audit contract"
+grep -Fq 'audit uses a fresh read-only GPT-6.1 Sol / High review' "$manifest" || fail "manifest omits audit contract"
 grep -Fq 'full combines one bounded implementer' "$manifest" || fail "manifest omits exceptional full contract"
 grep -Fq 'fails closed' "$manifest" || fail "manifest omits fail-closed evidence rule"
-pass "manifest JSON, v0.8.0 release, and GPT-6 selective-routing language"
+pass "manifest JSON, v0.9.0 release, and GPT-6.1 selective-routing language"
 
 python3 - "$templates" <<'PY'
 from pathlib import Path
@@ -335,7 +341,7 @@ expected = {
     },
     "sol-advisor-sol-reviewer.toml": {
         "name": "sol_advisor_sol_reviewer",
-        "model": "gpt-6-sol",
+        "model": "gpt-6.1-sol",
         "model_reasoning_effort": "high",
         "sandbox_mode": "read-only",
     },
@@ -362,7 +368,12 @@ for fingerprint in \
   "legacy_terra_v050_sha256=$legacy_terra_v050_sha256" \
   "legacy_luna_v060_sha256=$legacy_luna_v060_sha256" \
   "legacy_terra_v060_sha256=$legacy_terra_v060_sha256" \
-  "legacy_sol_v060_sha256=$legacy_sol_v060_sha256"; do
+  "legacy_sol_v060_sha256=$legacy_sol_v060_sha256" \
+  "legacy_luna_v060_crlf_sha256=$legacy_luna_v060_crlf_sha256" \
+  "legacy_terra_v060_crlf_sha256=$legacy_terra_v060_crlf_sha256" \
+  "legacy_sol_v060_crlf_sha256=$legacy_sol_v060_crlf_sha256" \
+  "legacy_sol_v080_sha256=$legacy_sol_v080_sha256" \
+  "legacy_sol_v080_crlf_sha256=$legacy_sol_v080_crlf_sha256"; do
   grep -Fq "$fingerprint" "$installer" || fail "installer historical digest mismatch: $fingerprint"
 done
 pass "immutable historical migration fingerprints"
@@ -477,6 +488,23 @@ test ! -e "$v060_migration_target/$terra_file" || fail "v0.6.0 migration retaine
 sh "$installer" --target-dir "$v060_migration_target" --check
 pass "exact v0.6.0 model and Terra-role migration"
 
+crlf_v060_target=$tmp_dir/crlf-v060-migration
+write_v060_roles "$crlf_v060_target"
+for role in "$luna_file" "$terra_file" "$sol_file"; do
+  sed 's/$/\r/' "$crlf_v060_target/$role" > "$crlf_v060_target/$role.crlf"
+  mv "$crlf_v060_target/$role.crlf" "$crlf_v060_target/$role"
+done
+[ "$(shasum -a 256 "$crlf_v060_target/$luna_file" | awk '{print $1}')" = 000ff8bed7f94f77a460fb81424d51233eb6146db5b21a346068aceb6a9abe27 ] || fail "CRLF v0.6.0 Luna fixture digest drifted"
+[ "$(shasum -a 256 "$crlf_v060_target/$terra_file" | awk '{print $1}')" = 7c9497c46207007565f72ac9bac6ce4954a1491914e4d64b44e27e4c27e8cd43 ] || fail "CRLF v0.6.0 Terra fixture digest drifted"
+[ "$(shasum -a 256 "$crlf_v060_target/$sol_file" | awk '{print $1}')" = 6ac63677bcc8677a9a743522cf06696c8edb1b005a61430e0fc8fa62e18dc355 ] || fail "CRLF v0.6.0 Sol fixture digest drifted"
+sh "$installer" --target-dir "$crlf_v060_target"
+for role in "$luna_file" "$max_file" "$sol_file"; do
+  cmp -s "$templates/$role" "$crlf_v060_target/$role" || fail "CRLF v0.6.0 migration mismatch: $role"
+done
+test ! -e "$crlf_v060_target/$terra_file" || fail "CRLF v0.6.0 migration retained retired Terra role"
+sh "$installer" --target-dir "$crlf_v060_target" --check
+pass "exact CRLF v0.6.0 migration to GPT-6 roles"
+
 v070_migration_target=$tmp_dir/v070-migration
 write_v070_roles "$v070_migration_target"
 sh "$installer" --target-dir "$v070_migration_target"
@@ -486,6 +514,33 @@ done
 test ! -e "$v070_migration_target/sol-advisor-luna-high-implementer.toml" || fail "v0.7.0 migration retained retired Luna High role"
 sh "$installer" --target-dir "$v070_migration_target" --check
 pass "exact v0.7.0 role migration to Luna High routine and Luna Max deep work"
+
+v080_fixture=$script_dir/fixtures/sol-reviewer-v0.8.toml
+[ "$(shasum -a 256 "$v080_fixture" | awk '{print $1}')" = "$legacy_sol_v080_sha256" ] || fail "v0.8.0 Sol fixture digest drifted"
+for newline_style in lf crlf; do
+  v080_target=$tmp_dir/v080-$newline_style-migration
+  sh "$installer" --target-dir "$v080_target"
+  if [ "$newline_style" = crlf ]; then
+    sed 's/$/\r/' "$v080_fixture" > "$v080_target/$sol_file"
+    [ "$(shasum -a 256 "$v080_target/$sol_file" | awk '{print $1}')" = "$legacy_sol_v080_crlf_sha256" ] || fail "CRLF v0.8.0 Sol fixture digest drifted"
+  else
+    cp "$v080_fixture" "$v080_target/$sol_file"
+  fi
+  sh "$installer" --target-dir "$v080_target"
+  cmp -s "$templates/$sol_file" "$v080_target/$sol_file" || fail "v0.8.0 $newline_style Sol migration mismatch"
+  sh "$installer" --target-dir "$v080_target" --check
+done
+pass "exact LF and CRLF v0.8.0 Sol reviewer migration"
+
+modified_v080_target=$tmp_dir/modified-v080-sol
+sh "$installer" --target-dir "$modified_v080_target"
+cp "$v080_fixture" "$modified_v080_target/$sol_file"
+printf '%s\n' modified >> "$modified_v080_target/$sol_file"
+before=$(snapshot_files "$modified_v080_target")
+if sh "$installer" --target-dir "$modified_v080_target"; then fail "installer replaced modified v0.8.0 Sol reviewer"; fi
+after=$(snapshot_files "$modified_v080_target")
+[ "$before" = "$after" ] || fail "modified v0.8.0 Sol reviewer refusal partially mutated target"
+pass "modified v0.8.0 Sol reviewer refusal with zero partial mutation"
 
 modified_v070_high=$tmp_dir/modified-v070-high
 write_v070_roles "$modified_v070_high"
@@ -543,15 +598,18 @@ pass "modified current-role refusal with zero partial mutation"
 
 unsafe=$tmp_dir/unsafe
 mkdir "$unsafe"
-ln -s "$templates/$luna_file" "$unsafe/$luna_file"
-before=$(snapshot_files "$unsafe")
-if sh "$installer" --target-dir "$unsafe"; then fail "installer accepted symlinked Luna"; fi
-after=$(snapshot_files "$unsafe")
-[ "$before" = "$after" ] || fail "symlink refusal partially mutated target"
-test ! -e "$unsafe/$terra_file" || fail "symlink refusal partially installed Terra"
-test ! -e "$unsafe/$max_file" || fail "symlink refusal partially installed Luna Max"
-test ! -e "$unsafe/$sol_file" || fail "symlink refusal partially installed Sol"
-pass "unsafe destination refusal with zero partial mutation"
+if ln -s "$templates/$luna_file" "$unsafe/$luna_file" && [ -L "$unsafe/$luna_file" ]; then
+  before=$(snapshot_files "$unsafe")
+  if sh "$installer" --target-dir "$unsafe"; then fail "installer accepted symlinked Luna"; fi
+  after=$(snapshot_files "$unsafe")
+  [ "$before" = "$after" ] || fail "symlink refusal partially mutated target"
+  test ! -e "$unsafe/$terra_file" || fail "symlink refusal partially installed Terra"
+  test ! -e "$unsafe/$max_file" || fail "symlink refusal partially installed Luna Max"
+  test ! -e "$unsafe/$sol_file" || fail "symlink refusal partially installed Sol"
+  pass "unsafe destination refusal with zero partial mutation"
+else
+  printf '%s\n' 'SKIP: symlink refusal; this host cannot create a native symlink.'
+fi
 
 runtime_sessions=$tmp_dir/runtime-sessions
 runtime_day=$runtime_sessions/2026/08/15
@@ -604,12 +662,12 @@ done
 grep -Fqi 'auxiliary work must substitute for root work' "$skill" || fail "skill permits duplicate auxiliary work"
 grep -Fqi 'auxiliary work substitutes for root work' "$contracts" || fail "contracts permit duplicate auxiliary work"
 grep -Fqi 'first result showing only a need for deeper technical reasoning' "$contracts" || fail "contracts omit bounded Luna High-to-Max escalation"
-grep -Fqi 'Judgment-heavy or high-risk decisions return to Sol / High' "$contracts" || fail "contracts delegate high-risk judgment to Luna"
+grep -Fqi 'Judgment-heavy or high-risk decisions return to GPT-6.1 Sol / High' "$contracts" || fail "contracts delegate high-risk judgment to Luna"
 grep -Fq 'do not request a fresh review' "$skill" || fail "skill makes delegate review mandatory"
 grep -Fq '`solo` and `delegate` do not receive a fresh reviewer' "$skill" || fail "skill makes solo/delegate review mandatory"
 grep -Fq 'audit: the root implements the required correction, re-verifies, and obtains a new' "$skill" || fail "skill does not assign audit corrections to root"
 grep -Fq 'full: the selected implementer handles a correction within the settled spec' "$skill" || fail "skill does not bound full corrections"
-grep -Fq 'If Sol / High has taken over implementation, the root handles it' "$skill" || fail "skill routes takeover corrections back to Luna"
+grep -Fq 'If GPT-6.1 Sol / High has taken over implementation, the root handles it' "$skill" || fail "skill routes takeover corrections back to Luna"
 if grep -Fq 'fix-first: delegate the required correction' "$skill"; then fail "skill retains unconditional fix-first delegation"; fi
 grep -Fq 'On `fix-first`, the root implements the' "$contracts" || fail "contracts do not assign audit corrections to root"
 grep -Fq 'On `fix-first`, the selected implementer handles a correction within the settled' "$contracts" || fail "contracts do not bound full corrections"
@@ -714,25 +772,25 @@ for path in paths:
 print("obsolete workflow references are absent")
 PY
 
-grep -Fq 'Sol / High runs the show' "$readme" || fail "README omits primary ownership"
+grep -Fq 'GPT-6.1 Sol / High runs the show' "$readme" || fail "README omits primary ownership"
 grep -Fq 'Luna / Max' "$readme" || fail "README omits Luna / Max delegate path"
 grep -Fq 'Luna / High' "$readme" || fail "README omits Luna / High delegate path"
 grep -Fq 'Auxiliary work substitutes' "$readme" || fail "README omits substitution rule"
 grep -Fq 'Attention Heads' "$readme" || fail "README lost Attention Heads section"
 grep -Fq 'https://attentionheads.substack.com/?utm_source=github&utm_medium=readme&utm_campaign=sol-advisor' "$readme" || fail "README changed Attention Heads link"
 grep -Fq 'https://attentionheads.substack.com/subscribe?utm_source=github&utm_medium=readme&utm_campaign=sol-advisor' "$readme" || fail "README changed Subscribe link"
-pass "README GPT-6 selective routing and preserved Go deeper links"
+pass "README GPT-6.1 selective routing and preserved Go deeper links"
 
 for document in "$readme" "$manifest" "$skill" "$contracts" "$operations" "$ui" "$templates"; do
   if rg -n -i 'gpt-5\.6|sol_advisor_terra_implementer|sol-advisor-terra-implementer|Terra / High' "$document"; then
     fail "active GPT-5.6 or Terra routing reference remains in $document"
   fi
 done
-pass "active routing surfaces contain only GPT-6 Sol and GPT-6 Luna roles"
+pass "active routing surfaces contain only GPT-6.1 Sol and GPT-6 Luna roles"
 
 sh -n "$installer"
 sh -n "$runtime_inspector"
 sh -n "$script_dir/verify.sh"
 pass "shell syntax"
 
-printf '%s\n' "VERIFY PASSED: Sol Advisor v0.8.0 GPT-6 selective routing checks completed in $tmp_dir"
+printf '%s\n' "VERIFY PASSED: Sol Advisor v0.9.0 GPT-6.1 selective routing checks completed in $tmp_dir"

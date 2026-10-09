@@ -17,10 +17,10 @@ preflight, runtime-evidence, isolation, and maintainer procedures.
 
 ## Confirm the primary session
 
-Run the primary Codex session on gpt-6-sol with high reasoning. Verify the current
+Run the primary Codex session on gpt-6.1-sol with high reasoning. Verify the current
 model and effort when runtime metadata exposes them. If either differs, tell the user
-to select Sol / High and stop before delegation. If runtime metadata does not expose
-them, ask the user to confirm Sol / High and stop until confirmed. A skill cannot
+to select GPT-6.1 Sol / High and stop before delegation. If runtime metadata does not expose
+them, ask the user to confirm GPT-6.1 Sol / High and stop until confirmed. A skill cannot
 change the primary model itself; never assume or claim this prerequisite is satisfied.
 
 ## Declare the route before task tools
@@ -41,9 +41,9 @@ preflight matrix are in operations.md.
 
 ## Preflight selected auxiliaries only
 
-Confirm Sol / High in the primary session. Preflight only an auxiliary selected by the
-declared route: none for solo; Luna / High or Luna / Max for delegate; fresh Sol / High
-for audit; and the selected implementer plus fresh Sol reviewer for full. Public metadata
+Confirm GPT-6.1 Sol / High in the primary session. Preflight only an auxiliary selected by the
+declared route: none for solo; Luna / High or Luna / Max for delegate; fresh GPT-6.1 Sol / High
+for audit; and the selected implementer plus fresh GPT-6.1 Sol reviewer for full. Public metadata
 for role, model, and effort is authoritative. If it omits a model or effort, use the
 local inspector only for that omitted field. Missing, conflicting, unavailable, or
 unobservable evidence stops the affected lane; never silently substitute a role,
@@ -56,18 +56,18 @@ model, effort, or reviewer.
   only for bounded work with settled architecture and acceptance criteria when
   technical depth matters more than speed or usage. The selected implementer executes
   the complete spec; root verifies; do not request a fresh review by default.
-- `audit`: root implements and verifies; a fresh read-only Sol / High reviewer reviews
+- `audit`: root implements and verifies; a fresh read-only GPT-6.1 Sol / High reviewer reviews
   the accumulated diff; spawn no implementer. Prefer this for ambiguous, judgment-heavy,
   or high-risk implementation that benefits from independent scrutiny.
 - `full`: only for an explicit broad or high-risk exception whose implementation is
   nevertheless bounded and fully specified. Select one Luna implementer, root verifies,
-  then a fresh read-only Sol / High reviewer reviews. If the architecture or acceptance
+  then a fresh read-only GPT-6.1 Sol / High reviewer reviews. If the architecture or acceptance
   criteria are unsettled, the root implements instead.
 
 Auxiliary work must substitute for root work, not duplicate it. A Luna / High result
 may justify Luna / Max only when it reveals a bounded, fully specified problem needing
 deeper technical reasoning. Ambiguity, material risk, architecture changes, or broad
-judgment calls require Sol / High to take over implementation. Record the evidence
+judgment calls require GPT-6.1 Sol / High to take over implementation. Record the evidence
 for any change of route or implementer; never silently downgrade review commitments.
 
 ## Keep architect work in the primary session
@@ -92,7 +92,7 @@ selected implementer's work in the primary session.
 
 ## Review only when the route includes it
 
-For `audit` and `full`, after parent verification, spawn a new native Sol / High
+For `audit` and `full`, after parent verification, spawn a new native GPT-6.1 Sol / High
 reviewer. The reviewer must remain behaviorally read-only, inspect the actual
 accumulated diff, and return exactly ship, fix-first, or rethink. A reviewer never
 implements its own fixes. `solo` and `delegate` do not receive a fresh reviewer.
@@ -102,7 +102,7 @@ implements its own fixes. `solo` and `delegate` do not receive a fresh reviewer.
   - audit: the root implements the required correction, re-verifies, and obtains a new
     fresh reviewer.
   - full: the selected implementer handles a correction within the settled spec.
-    If Sol / High has taken over implementation, the root handles it. The root
+    If GPT-6.1 Sol / High has taken over implementation, the root handles it. The root
     re-verifies, and a new fresh reviewer reviews.
   - solo and delegate: no fresh reviewer is added unless a newly observed,
     risk-evidenced route escalation is declared; never silently add one.

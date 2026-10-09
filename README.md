@@ -1,6 +1,6 @@
 # Sol Advisor
 
-**Sol / High runs the show. It declares a risk-gated route before task tools, keeps
+**GPT-6.1 Sol / High runs the show. It declares a risk-gated route before task tools, keeps
 solo as the default, and uses a single auxiliary only when that improves delivery.**
 
 Sol Advisor is a Codex-only workflow for capability-routed software delivery. You
@@ -13,7 +13,7 @@ I write [**Attention Heads**](https://attentionheads.substack.com/?utm_source=gi
 
 ## Quick start
 
-You need a current Codex CLI or ChatGPT desktop app with plugins enabled, GPT-6
+You need a current Codex CLI or ChatGPT desktop app with plugins enabled, GPT-6.1
 Sol / High for the primary session, native custom-agent support, and jq. GPT-6
 Luna / High or Luna / Max access is needed only when the selected route delegates.
 
@@ -47,8 +47,8 @@ acceptance.
 |---|---|---|
 | `solo` | Default; risk is contained. | Root plans, implements, tests, and self-reviews. |
 | `delegate` | Bounded work with settled architecture and acceptance criteria. | Luna / High by default; Luna / Max only when deep technical reasoning justifies its added time and usage. Root verifies. |
-| `audit` | Ambiguous, judgment-heavy, or high-risk implementation needs fresh scrutiny. | Sol / High root implements; a fresh read-only Sol / High reviews. |
-| `full` | Explicit broad or high-risk exception with a bounded implementation spec. | One selected Luna implementer, root verification, and a fresh Sol / High review. |
+| `audit` | Ambiguous, judgment-heavy, or high-risk implementation needs fresh scrutiny. | GPT-6.1 Sol / High root implements; a fresh read-only GPT-6.1 Sol / High reviews. |
+| `full` | Explicit broad or high-risk exception with a bounded implementation spec. | One selected Luna implementer, root verification, and a fresh GPT-6.1 Sol / High review. |
 
 Solo is the default. One auxiliary is the default maximum; `full` is the explicit
 exception. Sol emits a `SELECTIVE ROUTE` declaration with the mode and concise risk
@@ -58,12 +58,12 @@ reason. It never silently omits a promised review.
 
 ## What happens automatically
 
-Sol / High keeps architecture, decomposition, route selection, parent verification,
+GPT-6.1 Sol / High keeps architecture, decomposition, route selection, parent verification,
 escalation decisions, and acceptance in the primary task. Ambiguous or materially
-risky implementation decisions stay with Sol / High. Auxiliary work substitutes
+risky implementation decisions stay with GPT-6.1 Sol / High. Auxiliary work substitutes
 for root work; it does not duplicate it. The root inspects the complete diff and
-reruns the requested checks. When the selected route includes a review, a fresh Sol /
-High reviewer returns ship, fix-first, or rethink; any fix requires a new review.
+reruns the requested checks. When the selected route includes a review, a fresh GPT-6.1
+Sol / High reviewer returns ship, fix-first, or rethink; any fix requires a new review.
 
 ## Updating
 
