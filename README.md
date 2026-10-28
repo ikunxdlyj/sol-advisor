@@ -15,7 +15,7 @@ I write [**Attention Heads**](https://attentionheads.substack.com/?utm_source=gi
 
 You need a current Codex CLI or ChatGPT desktop app with plugins enabled, GPT-6.1
 Sol / High for the primary session, native custom-agent support, and jq. GPT-6
-Luna / High or Luna / Max access is needed only when the selected route delegates.
+Luna / High, Luna / Max, or GPT-6.1 Terra / High access is needed only for its selected lane; Terra requires CLI 0.159.0+ when using the CLI.
 
 ~~~sh
 codex plugin marketplace add ikunxdlyj/sol-advisor --ref main
@@ -23,7 +23,7 @@ codex plugin add sol-advisor@sol-advisor
 plugin_dir="$(codex plugin list --json | jq -r '.installed[] | select(.pluginId == "sol-advisor@sol-advisor") | .source.path')" && test -n "$plugin_dir" && test "$plugin_dir" != null && test -d "$plugin_dir" && test -f "$plugin_dir/scripts/install-agents.sh" && sh "$plugin_dir/scripts/install-agents.sh"
 ~~~
 
-The companion installer verifies all three exact role files after installation and
+The companion installer verifies all four exact role files after installation and
 migrates exact earlier Sol Advisor roles. It is fail-closed: modified, unsafe,
 nonregular, symlinked, unknown, or differing files are left untouched. It does not
 edit Codex configuration. Start a fresh Codex task after installation so native roles
@@ -46,10 +46,11 @@ acceptance.
 | Mode | Use it when | Delivery |
 |---|---|---|
 | `solo` | Default; risk is contained. | Root plans, implements, tests, and self-reviews. |
-| `delegate` | Bounded work with settled architecture and acceptance criteria. | Luna / High by default; Luna / Max only when deep technical reasoning justifies its added time and usage. Root verifies. |
+| `delegate` | Bounded work with settled architecture and acceptance criteria. | Luna / High for routine coding; Luna / Max for deep technical work; Terra / High for writing, visual checks and authorized app operation. Root verifies. |
 | `audit` | Ambiguous, judgment-heavy, or high-risk implementation needs fresh scrutiny. | GPT-6.1 Sol / High root implements; a fresh read-only GPT-6.1 Sol / High reviews. |
-| `full` | Explicit broad or high-risk exception with a bounded implementation spec. | One selected Luna implementer, root verification, and a fresh GPT-6.1 Sol / High review. |
+| `full` | Explicit broad or high-risk exception with a bounded implementation spec. | One selected Luna implementer or Terra specialist, root verification, and a fresh GPT-6.1 Sol / High review. |
 
+Terra visual checks supplement Sol's code review. Astra is a manual upgrade option; it is never automatically spawned.
 Solo is the default. One auxiliary is the default maximum; `full` is the explicit
 exception. Sol emits a `SELECTIVE ROUTE` declaration with the mode and concise risk
 rationale before the first task tool call. If newly observed evidence changes who

@@ -12,6 +12,7 @@ The installed TOMLs are the source of truth:
 |---|---|---|---|
 | sol_advisor_luna_implementer | gpt-6-luna | high | Delegate/full bounded routine implementation |
 | sol_advisor_luna_max_implementer | gpt-6-luna | max | Delegate/full bounded, fully specified deep technical work |
+| sol_advisor_terra_specialist | gpt-6.1-terra | high | Delegate/full bounded writing, visual checks and authorized app operation |
 | sol_advisor_sol_reviewer | gpt-6.1-sol | high | Audit/full fresh review; requests read-only sandbox |
 
 Native spawn requests name the role and use a fresh context:
@@ -28,6 +29,27 @@ technical reasoning within a settled specification:
 agent_type: sol_advisor_luna_max_implementer
 fork_turns: none
 ~~~
+
+Use Terra for a bounded specialty task, after checking `terra-high`:
+
+~~~text
+agent_type: sol_advisor_terra_specialist
+fork_turns: none
+~~~
+
+The selected lane must have its required tools, inputs and authenticated surface.
+Prefer a suitable connected API/tool before UI automation and keep one operator
+per shared browser or desktop. App access does not authorize external actions;
+carry the user's exact authorization into the worker packet and report evidence.
+GPT-6.1 Terra requires Codex CLI 0.159.0 or later when using the CLI. Verify the
+model is available to the current client/account before accepting runtime results.
+GPT-6 Astra remains manual-only; do not install or automatically spawn an Astra role.
+For a manual Astra consultation, suspend the selective route and provide the goal,
+constraints, unresolved decision, exact files and verification evidence. The user
+selects Astra and the effort; this consultation runs outside the four pinned routes
+without auxiliaries or Sol acceptance claims. Resume routing only after returning
+to GPT-6.1 Sol / High and re-verifying the primary. Sol evaluates the advice and
+keeps implementation ownership and final code-review responsibility.
 
 Use a fresh GPT-6.1 Sol reviewer only for audit or full after parent verification:
 
@@ -68,6 +90,9 @@ Luna pin to High, installed the bounded deep-work Luna / Max role, and retired t
 old Luna High role name only when that installed file was byte-exact. The v0.9.0
 upgrade changes the reviewer pin to GPT-6.1 Sol / High. It recognizes both LF and
 CRLF copies of the v0.8.0 reviewer role.
+The v0.10.0 update adds `sol-advisor-terra-specialist.toml` without reusing the
+retired `sol-advisor-terra-implementer.toml` name. The historical `terra` check alias
+still checks Luna Max; `terra-high` checks GPT-6.1 Terra / High.
 Modified, unsafe, nonregular, symlinked, or conflicting destinations remain refusals,
 and all mutations are preflighted.
 
@@ -84,7 +109,7 @@ or high-risk exception. If newly observed evidence changes the implementer or re
 need, the root declares the revised route and reason. It never silently omits a
 promised review.
 
-The existing --check flag verifies all three roles. For task-scoped preflight, check
+The existing --check flag verifies all four roles. For task-scoped preflight, check
 only the auxiliaries selected by the declaration; every check is non-mutating and
 fail-closed:
 
@@ -93,14 +118,17 @@ fail-closed:
 | solo | None |
 | delegate (Luna High) | `--check --check-role luna-high` |
 | delegate (Luna Max) | `--check --check-role luna-max` |
+| delegate (Terra High) | `--check --check-role terra-high` |
 | audit | `--check --check-role sol` |
 | full (Luna Max) | `--check --check-role luna-max --check-role sol` |
 | full (Luna High) | `--check --check-role luna-high --check-role sol` |
+| full (Terra High) | `--check --check-role terra-high --check-role sol` |
 
 For example:
 
 ~~~sh
 sh plugins/sol-advisor/scripts/install-agents.sh --check --check-role luna-max
+sh plugins/sol-advisor/scripts/install-agents.sh --check --check-role terra-high
 sh plugins/sol-advisor/scripts/install-agents.sh --check --check-role sol
 ~~~
 
@@ -144,7 +172,8 @@ prompts, messages, environment variables, tokens, configuration, or arbitrary ro
 payloads.
 
 Accepted routing is Luna / high for routine bounded delegate/full implementation,
-Luna / max for exceptional bounded deep technical work, and GPT-6.1 Sol / high for audit/full
+Luna / max for exceptional bounded deep technical work, Terra / high for specialty
+execution, and GPT-6.1 Sol / high for audit/full
 review. Judgment-heavy or high-risk implementation stays with the primary GPT-6.1 Sol / High.
 If public and local evidence both exist, they must agree. The local inspector is not a
 model-selection fallback.
@@ -166,7 +195,7 @@ verdict; parent verification and a new fresh review are required.
 
 ## Worker packet and parent acceptance
 
-Every Luna / High or Luna / Max prompt uses the five-part packet in role-contracts.md:
+Every Luna / High, Luna / Max, or Terra / High prompt uses the five-part packet in role-contracts.md:
 
 - OBJECTIVE
 - FILES AND OWNERSHIP
@@ -179,7 +208,7 @@ complete diff inspection, verification reruns, correction/escalation decisions, 
 acceptance. Worker claims never replace direct inspection.
 
 In solo, the root plans, implements, tests, and self-reviews with no auxiliary. In
-delegate, one selected Luna implementer completes a settled spec and the root
+delegate, one selected Luna implementer or Terra specialist completes a settled spec and the root
 verifies with no fresh reviewer by default. In audit, the root implements and verifies,
 then a fresh GPT-6.1 Sol reviewer reviews. In full, a bounded implementer completes the spec,
 the root verifies, and a fresh GPT-6.1 Sol reviewer reviews. If a worker reveals ambiguity or
@@ -198,7 +227,7 @@ git status --short
 git diff --stat
 ~~~
 
-The verifier covers the v0.9.0 manifest, exact GPT-6-family three-role TOMLs,
+The verifier covers the v0.10.0 manifest, exact GPT-6-family four-role TOMLs,
 selective-routing contracts, concise README journey, absence of retired active routes,
-safe historical migration, installer refusal fixtures, Luna runtime evidence,
+safe historical migration, installer refusal fixtures, Luna and Terra runtime evidence,
 JSON/TOML validity, and shell syntax.

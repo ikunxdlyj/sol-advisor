@@ -18,7 +18,8 @@ preflight, runtime-evidence, isolation, and maintainer procedures.
 ## Confirm the primary session
 
 Run the primary Codex session on gpt-6.1-sol with high reasoning. Verify the current
-model and effort when runtime metadata exposes them. If either differs, tell the user
+model and effort when runtime metadata exposes them. Outside an explicitly requested manual Astra consultation
+(defined below), if either differs, tell the user
 to select GPT-6.1 Sol / High and stop before delegation. If runtime metadata does not expose
 them, ask the user to confirm GPT-6.1 Sol / High and stop until confirmed. A skill cannot
 change the primary model itself; never assume or claim this prerequisite is satisfied.
@@ -42,7 +43,7 @@ preflight matrix are in operations.md.
 ## Preflight selected auxiliaries only
 
 Confirm GPT-6.1 Sol / High in the primary session. Preflight only an auxiliary selected by the
-declared route: none for solo; Luna / High or Luna / Max for delegate; fresh GPT-6.1 Sol / High
+declared route: none for solo; Luna / High, Luna / Max, or Terra / High for delegate; fresh GPT-6.1 Sol / High
 for audit; and the selected implementer plus fresh GPT-6.1 Sol reviewer for full. Public metadata
 for role, model, and effort is authoritative. If it omits a model or effort, use the
 local inspector only for that omitted field. Missing, conflicting, unavailable, or
@@ -54,13 +55,15 @@ model, effort, or reviewer.
 - `solo`: root plans, implements, tests, and self-reviews; spawn no auxiliary.
 - `delegate`: select Luna / High for bounded, fully specified work. Select Luna / Max
   only for bounded work with settled architecture and acceptance criteria when
-  technical depth matters more than speed or usage. The selected implementer executes
+  technical depth matters more than speed or usage. Select Terra / High for bounded
+  writing, visual understanding, visual/interaction checks, or authorized app operation.
+  The selected worker executes
   the complete spec; root verifies; do not request a fresh review by default.
 - `audit`: root implements and verifies; a fresh read-only GPT-6.1 Sol / High reviewer reviews
   the accumulated diff; spawn no implementer. Prefer this for ambiguous, judgment-heavy,
   or high-risk implementation that benefits from independent scrutiny.
 - `full`: only for an explicit broad or high-risk exception whose implementation is
-  nevertheless bounded and fully specified. Select one Luna implementer, root verifies,
+  nevertheless bounded and fully specified. Select one Luna implementer or Terra specialist, root verifies,
   then a fresh read-only GPT-6.1 Sol / High reviewer reviews. If the architecture or acceptance
   criteria are unsettled, the root implements instead.
 
@@ -69,6 +72,41 @@ may justify Luna / Max only when it reveals a bounded, fully specified problem n
 deeper technical reasoning. Ambiguity, material risk, architecture changes, or broad
 judgment calls require GPT-6.1 Sol / High to take over implementation. Record the evidence
 for any change of route or implementer; never silently downgrade review commitments.
+
+## Model responsibilities and specialty boundary
+
+| Model / effort | Responsibility |
+|---|---|
+| GPT-6.1 Sol / High | Primary architecture, ambiguity, complex business implementation, risk decisions, verification and acceptance |
+| GPT-6 Luna / High | Default bounded routine coding, CRUD, mappings and repeatable transformations |
+| GPT-6 Luna / Max | Exceptional bounded algorithms and deep technical implementation within settled architecture |
+| GPT-6.1 Terra / High | Clear writing, images/charts/screenshots, visual and interaction checks, authorized browser/desktop operation |
+| Fresh GPT-6.1 Sol / High | Read-only final code review for audit/full; Terra visual checks do not replace this verdict |
+| GPT-6 Astra | Manual upgrade option for exceptionally demanding cross-system reasoning, research or architecture |
+
+Astra is manual-only: recommend it when justified, but do not spawn it, select it
+as a fallback, or change the primary session automatically. The user selects the
+model and effort; this skill cannot switch the primary model.
+
+Manual Astra consultation is outside the four selective routes. Suspend the active
+route and give the user a handoff containing the goal, constraints, unresolved
+decision, exact files and verification evidence. If the user explicitly selects
+Astra, handle that consultation without spawning pinned auxiliaries or claiming
+Sol preflight, implementation acceptance or a final code-review verdict. Resume a selective route only after
+the user selects GPT-6.1 Sol / High and its primary settings are verified again.
+Sol evaluates the advice, owns any implementation, and retains the usual review gate.
+
+Terra must receive the same complete five-part specification and return evidence
+for parent acceptance. Use the distinct `sol_advisor_terra_specialist` role pinned
+to `gpt-6.1-terra` / `high`; preflight with `--check-role terra-high`. The historical
+`--check-role terra` alias still selects Luna Max, not the Terra specialty role.
+Confirm the selected lane can access its required inputs, tools and authenticated
+surface. Missing tools or access stop that lane; never invent successful actions.
+Prefer a suitable connected API/tool before UI automation. Allow only one operator
+on a shared browser or desktop. Tool access does not authorize messages, publishing,
+deployment, purchases, deletion or account-permission changes: require the user's
+explicit authorization for the action. Report unreadable details and uncertain
+values. Return ambiguity, architecture changes and material risk to the primary.
 
 ## Keep architect work in the primary session
 

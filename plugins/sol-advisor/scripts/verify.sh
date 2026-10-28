@@ -1,5 +1,5 @@
 #!/bin/sh
-# Repository-local verification for Sol Advisor's selective GPT-6 three-role architecture.
+# Repository-local verification for Sol Advisor's selective GPT-6 four-role architecture.
 
 set -eu
 
@@ -38,6 +38,7 @@ tmp_dir=$(mktemp -d "$tmp_base/sol-advisor-verify.XXXXXX") || fail "could not cr
 
 luna_file=sol-advisor-luna-implementer.toml
 max_file=sol-advisor-luna-max-implementer.toml
+specialist_file=sol-advisor-terra-specialist.toml
 retired_high_file=sol-advisor-luna-high-implementer.toml
 terra_file=sol-advisor-terra-implementer.toml
 sol_file=sol-advisor-sol-reviewer.toml
@@ -310,8 +311,8 @@ pass "required files present and retired contract absent"
 
 jq empty "$manifest"
 manifest_version=$(jq -r '.version' "$manifest")
-printf '%s\n' "$manifest_version" | grep -Eq '^0\.9\.0(\+codex\.[A-Za-z0-9][A-Za-z0-9._-]*)?$' ||
-  fail "manifest version is neither 0.9.0 nor a valid 0.9.0 Codex cachebuster"
+printf '%s\n' "$manifest_version" | grep -Eq '^0\.10\.0(\+codex\.[A-Za-z0-9][A-Za-z0-9._-]*)?$' ||
+  fail "manifest version is neither 0.10.0 nor a valid 0.10.0 Codex cachebuster"
 grep -Fq 'GPT-6.1 Sol / High in the primary session' "$manifest" || fail "manifest omits the GPT-6.1 Sol primary"
 grep -Fq 'SELECTIVE ROUTE' "$manifest" || fail "manifest omits route declaration"
 grep -Fq 'solo is the default' "$manifest" || fail "manifest omits solo default"
@@ -320,7 +321,7 @@ grep -Fq 'GPT-6 Luna / Max only for fully specified deep technical work' "$manif
 grep -Fq 'audit uses a fresh read-only GPT-6.1 Sol / High review' "$manifest" || fail "manifest omits audit contract"
 grep -Fq 'full combines one bounded implementer' "$manifest" || fail "manifest omits exceptional full contract"
 grep -Fq 'fails closed' "$manifest" || fail "manifest omits fail-closed evidence rule"
-pass "manifest JSON, v0.9.0 release, and GPT-6.1 selective-routing language"
+pass "manifest JSON, v0.10.0 release, and GPT-6.1 selective-routing language"
 
 python3 - "$templates" <<'PY'
 from pathlib import Path
@@ -345,6 +346,11 @@ expected = {
         "model_reasoning_effort": "high",
         "sandbox_mode": "read-only",
     },
+    "sol-advisor-terra-specialist.toml": {
+        "name": "sol_advisor_terra_specialist",
+        "model": "gpt-6.1-terra",
+        "model_reasoning_effort": "high",
+    },
 }
 actual = {path.name for path in root.glob("*.toml")}
 if actual != set(expected):
@@ -357,9 +363,9 @@ for filename, pins in expected.items():
     for field, value in pins.items():
         if data.get(field) != value:
             raise SystemExit(f"{filename}: {field}={data.get(field)!r}, expected {value!r}")
-print("three exact role pins are valid")
+print("four exact role pins are valid")
 PY
-pass "exact three-role TOML inventory"
+pass "exact four-role TOML inventory"
 
 for fingerprint in \
   "legacy_luna_sha256=$legacy_luna_sha256" \
@@ -439,6 +445,60 @@ alias_target=$tmp_dir/compatibility-aliases
 sh "$installer" --target-dir "$alias_target"
 sh "$installer" --target-dir "$alias_target" --check --check-role luna --check-role terra --check-role sol
 pass "legacy luna and terra check-role aliases select Luna High and Luna Max"
+
+# 新通道与历史 terra 别名必须独立，未选通道损坏不能阻塞专项预检。
+terra_target=$tmp_dir/terra-selective
+sh "$installer" --target-dir "$terra_target"
+printf '%s\n' modified >> "$terra_target/$max_file"
+before=$(snapshot_files "$terra_target")
+sh "$installer" --target-dir "$terra_target" --check-role terra-high --check-role sol
+if sh "$installer" --target-dir "$terra_target" --check-role terra >/dev/null 2>&1; then
+  fail "historical terra alias no longer checks Luna Max"
+fi
+after=$(snapshot_files "$terra_target")
+[ "$before" = "$after" ] || fail "Terra selective check or old alias mutated target"
+cp "$templates/$max_file" "$terra_target/$max_file"
+printf '%s\n' modified >> "$terra_target/$specialist_file"
+before=$(snapshot_files "$terra_target")
+sh "$installer" --target-dir "$terra_target" --check-role terra --check-role luna-high --check-role sol
+if sh "$installer" --target-dir "$terra_target" --check-role terra-high >/dev/null 2>&1; then
+  fail "Terra preflight accepted modified specialty role"
+fi
+if sh "$installer" --target-dir "$terra_target" --check >/dev/null 2>&1; then
+  fail "all-role check accepted modified specialty role"
+fi
+after=$(snapshot_files "$terra_target")
+[ "$before" = "$after" ] || fail "modified Terra checks mutated target"
+pass "Terra selective checks and historical alias remain independent and non-mutating"
+
+# 模拟原 v0.9 三角色安装，新增文件前先验证检查模式不会偷偷安装。
+v090_target=$tmp_dir/v090-migration
+mkdir "$v090_target"
+for role in "$luna_file" "$max_file" "$sol_file"; do
+  cp "$templates/$role" "$v090_target/$role"
+done
+before=$(snapshot_files "$v090_target")
+if sh "$installer" --target-dir "$v090_target" --check-role terra-high >/dev/null 2>&1; then
+  fail "Terra preflight accepted missing specialty role"
+fi
+after=$(snapshot_files "$v090_target")
+[ "$before" = "$after" ] || fail "missing Terra preflight mutated v0.9 install"
+sh "$installer" --target-dir "$v090_target"
+sh "$installer" --target-dir "$v090_target" --check
+for role in "$luna_file" "$max_file" "$sol_file" "$specialist_file"; do
+  cmp -s "$templates/$role" "$v090_target/$role" || fail "v0.9 migration mismatch: $role"
+done
+pass "v0.9 three-role installation upgrades to four exact roles"
+
+terra_conflict=$tmp_dir/terra-conflict
+mkdir "$terra_conflict"
+cp "$templates/$specialist_file" "$terra_conflict/$specialist_file"
+printf '%s\n' modified >> "$terra_conflict/$specialist_file"
+before=$(snapshot_files "$terra_conflict")
+if sh "$installer" --target-dir "$terra_conflict"; then fail "installer replaced modified Terra specialist"; fi
+after=$(snapshot_files "$terra_conflict")
+[ "$before" = "$after" ] || fail "Terra conflict partially installed other roles"
+pass "Terra conflict refusal with zero partial mutation"
 
 missing_target=$tmp_dir/missing
 if sh "$installer" --target-dir "$missing_target" --check; then fail "--check accepted missing target"; fi
@@ -634,10 +694,23 @@ zero_id=22222222-2222-7222-8222-222222222222
 if sh "$runtime_inspector" --sessions-dir "$runtime_sessions" "$zero_id" >/dev/null 2>&1; then fail "runtime inspector accepted zero matches"; fi
 pass "runtime inspector Luna/High routing and safe refusal"
 
+terra_runtime_id=33333333-3333-7333-8333-333333333333
+terra_runtime_rollout=$runtime_day/rollout-2026-10-28T00-00-00-$terra_runtime_id.jsonl
+printf '%s\n' \
+  "{\"type\":\"session_meta\",\"payload\":{\"id\":\"$terra_runtime_id\",\"agent_role\":\"sol_advisor_terra_specialist\",\"cwd\":\"/fixture\"}}" \
+  '{"type":"turn_context","payload":{"model":"gpt-6.1-terra","effort":"high","sandbox_policy":{"type":"danger-full-access"},"permission_profile":{"type":"disabled"},"cwd":"/fixture"}}' \
+  > "$terra_runtime_rollout"
+terra_runtime_output=$(sh "$runtime_inspector" --sessions-dir "$runtime_sessions" "$terra_runtime_id")
+printf '%s\n' "$terra_runtime_output" | jq -e '
+  .agent_role == "sol_advisor_terra_specialist" and .model == "gpt-6.1-terra" and .effort == "high"
+' >/dev/null || fail "runtime inspector returned wrong Terra/High evidence"
+pass "runtime inspector Terra/High fixture evidence"
+
 for document in "$contracts" "$operations"; do
   grep -Fq 'agent_type: sol_advisor_luna_implementer' "$document" || fail "missing Luna spawn in $document"
   grep -Fq 'agent_type: sol_advisor_luna_max_implementer' "$document" || fail "missing Luna Max spawn in $document"
   grep -Fq 'agent_type: sol_advisor_sol_reviewer' "$document" || fail "missing Sol spawn in $document"
+  grep -Fq 'agent_type: sol_advisor_terra_specialist' "$document" || fail "missing Terra spawn in $document"
   grep -Fq 'fork_turns: none' "$document" || fail "missing fresh context in $document"
   if grep -Eq 'agent_type:.*terra_max' "$document"; then fail "retired Terra-Max spawn remains in $document"; fi
   if grep -Eq '^[[:space:]]*(model|reasoning_effort):' "$document"; then fail "per-spawn override remains in $document"; fi
@@ -713,7 +786,7 @@ grep -Fq 'before the first task tool call' "$readme" || fail "README omits route
 grep -Fq 'newly observed' "$readme" || fail "README omits route revision gate"
 grep -Fq 'never silently omits a promised review' "$readme" || fail "README permits silent review omission"
 grep -Fq 'need to select or manage a lane' "$readme" || fail "README asks users to manage lanes"
-grep -Fq 'Luna / High or Luna / Max access is needed only when' "$readme" || fail "README omits conditional delegate access"
+grep -Fq 'access is needed only for its selected lane' "$readme" || fail "README omits conditional delegate access"
 python3 - "$readme" <<'PY'
 from pathlib import Path
 import sys
@@ -782,15 +855,25 @@ grep -Fq 'https://attentionheads.substack.com/subscribe?utm_source=github&utm_me
 pass "README GPT-6.1 selective routing and preserved Go deeper links"
 
 for document in "$readme" "$manifest" "$skill" "$contracts" "$operations" "$ui" "$templates"; do
-  if rg -n -i 'gpt-5\.6|sol_advisor_terra_implementer|sol-advisor-terra-implementer|Terra / High' "$document"; then
-    fail "active GPT-5.6 or Terra routing reference remains in $document"
+  if rg -n -i 'gpt-5\.6|agent_type:[[:space:]]*sol_advisor_terra_implementer' "$document"; then
+    fail "retired GPT-5.6 or Terra implementation route remains in $document"
   fi
 done
-pass "active routing surfaces contain only GPT-6.1 Sol and GPT-6 Luna roles"
+for document in "$skill" "$contracts" "$operations" "$manifest"; do
+  grep -Fq 'GPT-6.1 Terra / High' "$document" || fail "missing Terra specialty pin in $document"
+  grep -Fq 'manual' "$document" || fail "missing manual Astra boundary in $document"
+done
+grep -Fq 'Outside an explicitly requested manual Astra consultation' "$skill" || fail "Astra consultation conflicts with primary preflight"
+grep -Fq 'Resume a selective route only after' "$skill" || fail "Astra consultation lacks verified Sol return"
+for document in "$contracts" "$operations"; do
+  grep -Fq 'Resume routing only after' "$document" || fail "Astra handoff lacks verified Sol return in $document"
+done
+if rg -n 'model = "gpt-6-astra"' "$templates"; then fail "automatic Astra role was installed"; fi
+pass "active routing includes Terra specialty work and keeps Astra manual-only"
 
 sh -n "$installer"
 sh -n "$runtime_inspector"
 sh -n "$script_dir/verify.sh"
 pass "shell syntax"
 
-printf '%s\n' "VERIFY PASSED: Sol Advisor v0.9.0 GPT-6.1 selective routing checks completed in $tmp_dir"
+printf '%s\n' "VERIFY PASSED: Sol Advisor v0.10.0 GPT-6.1 selective routing checks completed in $tmp_dir"
