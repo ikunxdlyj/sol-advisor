@@ -21,8 +21,8 @@ Solo is the default; one auxiliary is the default maximum. Full is an explicit b
 or high-risk exception. Declare any change of implementer or review commitment with
 the newly observed evidence. Never silently omit a promised review.
 
-Confirm GPT-6.1 Sol / High in the primary session, then preflight only auxiliaries selected by
-the route: none for solo; Luna / High or Luna / Max for delegate; fresh GPT-6.1 Sol / High
+For any selective route, confirm GPT-6.1 Sol / High in the primary session, then preflight only auxiliaries selected by
+the route: none for solo; Luna / High, Luna / Max, or Terra / High for delegate; fresh GPT-6.1 Sol / High
 for audit; and one selected implementer plus fresh GPT-6.1 Sol reviewer for full. Cache each
 successful check only for the task. After spawning, complete the selected role's
 routing and reviewer-isolation checks before accepting the result:
@@ -31,7 +31,8 @@ routing and reviewer-isolation checks before accepting the result:
 2. Observe the selected role, model, and effort through public spawn/details metadata
    first, using the local runtime inspector only for omitted fields. Accept Luna /
    High for routine delegate/full implementation, Luna / Max only for bounded,
-   fully specified deep technical work, and GPT-6.1 Sol / High for audit/full review.
+   fully specified deep technical work, Terra / High for bounded specialty work,
+   and GPT-6.1 Sol / High for audit/full review.
 3. For the reviewer, capture actual sandbox policy and permission profile types.
 
 A missing, stale, unsafe, conflicting, unavailable, inconsistent, or unobservable
@@ -40,7 +41,7 @@ are pinned by custom-agent TOML, so omit native per-spawn overrides.
 
 ## Shared implementation contract
 
-Every Luna / High or Luna / Max prompt must contain all five sections:
+Every Luna / High, Luna / Max, or Terra / High prompt must contain all five sections:
 
 ~~~text
 OBJECTIVE
@@ -85,13 +86,14 @@ The primary session must inspect the diff and rerun verification itself.
 - `solo`: root plans, implements, tests, and self-reviews. Spawn no auxiliary.
 - `delegate`: one selected Luna / High implementer executes the complete five-part
   specification; use Luna / Max only for bounded, fully specified deep technical
-  work. The root verifies. Do not spawn a fresh reviewer by default.
+  work, or Terra / High for bounded writing, visual checks and authorized app operation.
+  The root verifies. Do not spawn a fresh reviewer by default.
 - `audit`: root implements and verifies. A fresh read-only GPT-6.1 Sol / High reviewer inspects
   the accumulated diff. Prefer it for ambiguity, material risk, or judgment-heavy work.
   Spawn no implementer. On `fix-first`, the root implements the correction, re-verifies,
   and obtains a new fresh reviewer.
 - `full`: use only for an explicit broad or high-risk exception with settled architecture
-  and acceptance criteria. One selected Luna / High or Luna / Max implementer executes
+  and acceptance criteria. One selected Luna / High, Luna / Max, or Terra / High worker executes
   the complete specification, the root verifies, and a fresh read-only GPT-6.1 Sol / High
   reviewer inspects the accumulated diff.
   On `fix-first`, the selected implementer handles a correction within the settled
@@ -154,6 +156,55 @@ and constraint, and return ambiguous or high-risk decisions to GPT-6.1 Sol / Hig
 
 <paste and complete the Shared implementation contract>
 ~~~
+
+## Terra / High - bounded specialty execution lane
+
+Use GPT-6.1 Terra / High for clear writing, understanding images, charts or
+screenshots, visual and interaction checks, or explicitly authorized browser and
+desktop operations. Visual findings supplement parent verification; this worker
+does not replace the fresh Sol code reviewer or decide architecture and material risk.
+
+Spawn exactly, after the `terra-high` companion check:
+
+~~~text
+agent_type: sol_advisor_terra_specialist
+fork_turns: none
+~~~
+
+Do not attach per-spawn model or reasoning fields. Prompt:
+
+~~~text
+ROLE
+Act as Sol Advisor's Terra specialty worker on gpt-6.1-terra / high. Execute the
+bounded task and return evidence for the primary session's acceptance.
+
+<paste and complete the Shared implementation contract>
+
+SPECIALTY SCOPE
+- Inputs and references: <exact images, sources, documents or screenshots>
+- Authorized surfaces and actions: <exact apps, accounts and permitted changes>
+- Required tools and access: <verify in this lane; stop if unavailable>
+- Shared UI ownership: <one operator; no concurrent browser/desktop interaction>
+- Prefer a suitable connected API/tool before UI automation.
+- Tool availability is not permission to send messages, publish, deploy, purchase,
+  delete or change account permissions; require explicit user authorization.
+- Mark unreadable details and uncertain values instead of guessing.
+- Return source references, observed state/artifacts, actions taken, checks and gaps.
+- Return material ambiguity, architectural changes and risk decisions to the parent.
+~~~
+
+## Astra - manual upgrade only
+
+For exceptionally demanding cross-system reasoning, research or architecture,
+the primary may recommend GPT-6 Astra and explain why. Suspend the selective route
+and hand off the goal, constraints, unresolved decision, exact files and verification
+evidence. The user selects the model and effort manually for a consultation outside
+these four routes. An explicitly selected Astra consultation does not run pinned
+auxiliaries, satisfy Sol preflight, accept implementation or issue a final review
+verdict. Resume routing only after GPT-6.1 Sol / High is selected and re-verified;
+Sol evaluates the advice and owns implementation and the usual review gate.
+Do not install an Astra role, spawn Astra automatically, silently substitute it,
+or claim to have switched the primary session.
 
 ## Fresh GPT-6.1 Sol / High - requested-read-only audit/full reviewer
 
