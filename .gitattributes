@@ -1,1 +1,2 @@
 plugins/sol-advisor/scripts/fixtures/sol-reviewer-v0.8.toml text eol=lf
+plugins/sol-advisor/scripts/fixtures/v0.10/*.toml text eol=lf

@@ -280,14 +280,21 @@ legacy_luna_v070_sha256=df2244de46202513abd8451e3837122d47a7de82342e20853d06f746
 legacy_high_v070_sha256=c4d09eaf837973d729eeaf05d022da97fd9349123d857852e78816906479a705
 legacy_sol_v080_sha256=18cb3a5c08eb3f103f07626c944b9ba8978b20c5a706cf4579e07a5fded18e0a
 legacy_sol_v080_crlf_sha256=4238b91b1e1dde1d93282a0bb4586361e8c3f0690c48397f98df04eccf42b384
-luna_legacy_digests="$legacy_luna_sha256 $legacy_luna_v050_sha256 $legacy_luna_v060_sha256 $legacy_luna_v060_crlf_sha256 $legacy_luna_v070_sha256"
+# v0.10 角色仅允许按精确 LF/CRLF 指纹迁移，保留所有用户定制。
+legacy_luna_v010_sha256=de0a29a94dd09db39738cee106ced36a076bd0ce5a86a4babde8468f48694016
+legacy_luna_v010_crlf_sha256=3038e6aea67cb7b5d2deb2457fa8ff45f75870791654d0854b5779ddc0ca81e1
+legacy_max_v010_sha256=c36d25cf9169b1be536aaaed743b69b78e5d86d2f694665031b6a3cc0d16cc15
+legacy_max_v010_crlf_sha256=212ac8dd45f99f93d1c50c78fe3b38196934c628a4334624aa8db81b95330268
+legacy_specialist_v010_sha256=1d28d5fd87c277699a43d2243a4ed79e94137a4431d228eeb28cbf2282f7c7c7
+legacy_specialist_v010_crlf_sha256=a28ea02ba506942c1db5e1138d4520af4811e667ca8ab7495b59f6877554f245
+legacy_sol_v010_sha256=83fa964b13e43f59794e857bf79856960c30dff3a000e805c9cf25f4b2111e2e
+legacy_sol_v010_crlf_sha256=2d72970be77909adcfb941834744be620af93dd4d755c8f4e54a6c12da777829
+luna_legacy_digests="$legacy_luna_sha256 $legacy_luna_v050_sha256 $legacy_luna_v060_sha256 $legacy_luna_v060_crlf_sha256 $legacy_luna_v070_sha256 $legacy_luna_v010_sha256 $legacy_luna_v010_crlf_sha256"
 terra_legacy_digests="$legacy_terra_sha256 $legacy_terra_v050_sha256 $legacy_terra_v060_sha256 $legacy_terra_v060_crlf_sha256"
-sol_legacy_digests="$legacy_sol_v060_sha256 $legacy_sol_v060_crlf_sha256 $legacy_sol_v080_sha256 $legacy_sol_v080_crlf_sha256"
+sol_legacy_digests="$legacy_sol_v060_sha256 $legacy_sol_v060_crlf_sha256 $legacy_sol_v080_sha256 $legacy_sol_v080_crlf_sha256 $legacy_sol_v010_sha256 $legacy_sol_v010_crlf_sha256"
 
-for template in "$luna_template" "$max_template" "$specialist_template" "$sol_template"; do
-  [ -f "$template" ] && [ ! -L "$template" ] ||
-    fail "shipped template is missing or not a regular file: $template"
-done
+max_legacy_digests="$legacy_max_v010_sha256 $legacy_max_v010_crlf_sha256"
+specialist_legacy_digests="$legacy_specialist_v010_sha256 $legacy_specialist_v010_crlf_sha256"
 
 preflight_failed=0
 if path_exists "$target_dir"; then
@@ -296,67 +303,32 @@ if path_exists "$target_dir"; then
   fi
 fi
 
-luna_state=$(classify_current_or_legacy "$luna_destination" "$luna_template" "$luna_legacy_digests")
-max_state=$(classify_current_or_legacy "$max_destination" "$max_template" '')
-specialist_state=$(classify_current_or_legacy "$specialist_destination" "$specialist_template" '')
-sol_state=$(classify_current_or_legacy "$sol_destination" "$sol_template" "$sol_legacy_digests")
-retired_high_state=$(classify_retired "$retired_high_destination" "$legacy_high_v070_sha256")
-retired_terra_state=$(classify_retired "$retired_terra_destination" "$terra_legacy_digests")
-
+# 任务预检只比较选中角色的模板，不计算无关角色的历史指纹。
 if [ "$check_only" -eq 1 ]; then
-  if role_selected luna-high; then
-    [ "$luna_state" = current ] ||
-      report_preflight_error "Luna High template is $luna_state, not the current exact file: $luna_destination"
-  fi
-  if role_selected luna-max; then
-    [ "$max_state" = current ] ||
-      report_preflight_error "Luna Max template is $max_state, not the current exact file: $max_destination"
-  fi
-  if role_selected terra-high; then
-    [ "$specialist_state" = current ] ||
-      report_preflight_error "Terra High template is $specialist_state, not the current exact file: $specialist_destination"
-  fi
-  # 旧 terra 参数继续检查 Luna Max；旧 Terra 文件的退役校验同时覆盖新通道。
+  for selected in luna-high luna-max terra-high sol; do
+    role_selected "$selected" || continue
+    case "$selected" in
+      luna-high) template=$luna_template; destination=$luna_destination ;;
+      luna-max) template=$max_template; destination=$max_destination ;;
+      terra-high) template=$specialist_template; destination=$specialist_destination ;;
+      sol) template=$sol_template; destination=$sol_destination ;;
+    esac
+    [ -f "$template" ] && [ ! -L "$template" ] ||
+      fail "shipped template is missing or not a regular file: $template"
+    if [ ! -f "$destination" ] || [ -L "$destination" ] || ! cmp -s "$template" "$destination"; then
+      report_preflight_error "$selected does not match the current exact template: $destination"
+    fi
+  done
+  # 历史别名的退役检查仅随相关角色执行，避免影响无关通道。
   if role_selected luna-max || role_selected terra-high; then
-    [ "$retired_high_state" = missing ] ||
-      report_preflight_error "retired Luna High role is $retired_high_state, not absent: $retired_high_destination"
-    [ "$retired_terra_state" = missing ] ||
-      report_preflight_error "retired Terra role is $retired_terra_state, not absent: $retired_terra_destination"
+    if path_exists "$retired_high_destination"; then
+      report_preflight_error "retired Luna High role is not absent: $retired_high_destination"
+    fi
+    if path_exists "$retired_terra_destination"; then
+      report_preflight_error "retired Terra role is not absent: $retired_terra_destination"
+    fi
   fi
-  if role_selected sol; then
-    [ "$sol_state" = current ] ||
-      report_preflight_error "Sol template is $sol_state, not the current exact file: $sol_destination"
-  fi
-else
-  case "$luna_state" in
-    current|legacy|missing) ;;
-    *) report_preflight_error "Luna High destination is $luna_state and will not be replaced: $luna_destination" ;;
-  esac
-  case "$max_state" in
-    current|missing) ;;
-    *) report_preflight_error "Luna Max destination is $max_state and will not be replaced: $max_destination" ;;
-  esac
-  case "$specialist_state" in
-    current|missing) ;;
-    *) report_preflight_error "Terra High destination is $specialist_state and will not be replaced: $specialist_destination" ;;
-  esac
-  case "$sol_state" in
-    current|legacy|missing) ;;
-    *) report_preflight_error "Sol destination is $sol_state and will not be replaced: $sol_destination" ;;
-  esac
-  case "$retired_high_state" in
-    legacy|missing) ;;
-    *) report_preflight_error "retired Luna High destination is $retired_high_state and will not be removed: $retired_high_destination" ;;
-  esac
-  case "$retired_terra_state" in
-    legacy|missing) ;;
-    *) report_preflight_error "retired high-risk destination is $retired_terra_state and will not be removed: $retired_terra_destination" ;;
-  esac
-fi
-
-[ "$preflight_failed" -eq 0 ] || exit 1
-
-if [ "$check_only" -eq 1 ]; then
+  [ "$preflight_failed" -eq 0 ] || exit 1
   if [ -n "$check_roles" ]; then
     printf '%s\n' "CHECK PASSED: selected role templates exactly match $template_dir."
   else
@@ -365,6 +337,46 @@ if [ "$check_only" -eq 1 ]; then
   exit 0
 fi
 
+# 安装及迁移仍先检查全部目标，任一冲突都必须在写入前失败。
+for template in "$luna_template" "$max_template" "$specialist_template" "$sol_template"; do
+  [ -f "$template" ] && [ ! -L "$template" ] ||
+    fail "shipped template is missing or not a regular file: $template"
+done
+luna_state=$(classify_current_or_legacy "$luna_destination" "$luna_template" "$luna_legacy_digests")
+max_state=$(classify_current_or_legacy "$max_destination" "$max_template" "$max_legacy_digests")
+specialist_state=$(classify_current_or_legacy "$specialist_destination" "$specialist_template" "$specialist_legacy_digests")
+sol_state=$(classify_current_or_legacy "$sol_destination" "$sol_template" "$sol_legacy_digests")
+retired_high_state=$(classify_retired "$retired_high_destination" "$legacy_high_v070_sha256")
+retired_terra_state=$(classify_retired "$retired_terra_destination" "$terra_legacy_digests")
+
+case "$luna_state" in
+  current|legacy|missing) ;;
+  *) report_preflight_error "Luna High destination is $luna_state and will not be replaced: $luna_destination" ;;
+esac
+case "$max_state" in
+  current|legacy|missing) ;;
+  *) report_preflight_error "Luna Max destination is $max_state and will not be replaced: $max_destination" ;;
+esac
+case "$specialist_state" in
+  current|legacy|missing) ;;
+  *) report_preflight_error "Terra High destination is $specialist_state and will not be replaced: $specialist_destination" ;;
+esac
+case "$sol_state" in
+  current|legacy|missing) ;;
+  *) report_preflight_error "Sol destination is $sol_state and will not be replaced: $sol_destination" ;;
+esac
+case "$retired_high_state" in
+  legacy|missing) ;;
+  *) report_preflight_error "retired Luna High destination is $retired_high_state and will not be removed: $retired_high_destination" ;;
+esac
+case "$retired_terra_state" in
+  legacy|missing) ;;
+  *) report_preflight_error "retired high-risk destination is $retired_terra_state and will not be removed: $retired_terra_destination" ;;
+esac
+
+[ "$preflight_failed" -eq 0 ] || exit 1
+
+
 if [ ! -d "$target_dir" ]; then
   mkdir -p "$target_dir" || fail "could not create target directory: $target_dir"
 fi
@@ -372,8 +384,8 @@ fi
   fail "target directory changed after preflight: $target_dir"
 
 same_state "Luna High" "$luna_state" "$(classify_current_or_legacy "$luna_destination" "$luna_template" "$luna_legacy_digests")"
-same_state "Luna Max" "$max_state" "$(classify_current_or_legacy "$max_destination" "$max_template" '')"
-same_state "Terra High" "$specialist_state" "$(classify_current_or_legacy "$specialist_destination" "$specialist_template" '')"
+same_state "Luna Max" "$max_state" "$(classify_current_or_legacy "$max_destination" "$max_template" "$max_legacy_digests")"
+same_state "Terra High" "$specialist_state" "$(classify_current_or_legacy "$specialist_destination" "$specialist_template" "$specialist_legacy_digests")"
 same_state Sol "$sol_state" "$(classify_current_or_legacy "$sol_destination" "$sol_template" "$sol_legacy_digests")"
 same_state "retired Luna High role" "$retired_high_state" "$(classify_retired "$retired_high_destination" "$legacy_high_v070_sha256")"
 same_state "retired high-risk role" "$retired_terra_state" "$(classify_retired "$retired_terra_destination" "$terra_legacy_digests")"
@@ -386,6 +398,7 @@ esac
 
 case "$max_state" in
   missing) install_missing "$max_template" "$max_destination" ;;
+  legacy) replace_legacy_role "Luna Max" "$max_template" "$max_destination" "$max_legacy_digests" ;;
   current) printf '%s\n' "ALREADY CURRENT: $max_destination" ;;
 esac
 
@@ -397,6 +410,7 @@ esac
 
 case "$specialist_state" in
   missing) install_missing "$specialist_template" "$specialist_destination" ;;
+  legacy) replace_legacy_role "Terra High" "$specialist_template" "$specialist_destination" "$specialist_legacy_digests" ;;
   current) printf '%s\n' "ALREADY CURRENT: $specialist_destination" ;;
 esac
 
@@ -412,9 +426,9 @@ esac
 
 [ "$(classify_current_or_legacy "$luna_destination" "$luna_template" "$luna_legacy_digests")" = current ] ||
   fail "post-install exactness check failed: $luna_destination"
-[ "$(classify_current_or_legacy "$max_destination" "$max_template" '')" = current ] ||
+[ "$(classify_current_or_legacy "$max_destination" "$max_template" "$max_legacy_digests")" = current ] ||
   fail "post-install exactness check failed: $max_destination"
-[ "$(classify_current_or_legacy "$specialist_destination" "$specialist_template" '')" = current ] ||
+[ "$(classify_current_or_legacy "$specialist_destination" "$specialist_template" "$specialist_legacy_digests")" = current ] ||
   fail "post-install exactness check failed: $specialist_destination"
 [ "$(classify_current_or_legacy "$sol_destination" "$sol_template" "$sol_legacy_digests")" = current ] ||
   fail "post-install exactness check failed: $sol_destination"

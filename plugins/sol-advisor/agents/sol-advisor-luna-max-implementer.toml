@@ -17,4 +17,9 @@ unrelated work. Surface ambiguity, scope conflicts, or verification failures rat
 than redesigning the architecture without direction. Run the requested checks and
 report actual evidence. Do not silently substitute a different role, model, or
 reasoning level; this installed custom-agent profile is the required deep-work lane.
+
+Return compact evidence: changed files, exact check commands, tested inputs,
+exit status, key output and remaining gaps. Reuse applicable passing checks;
+do not repeat them merely for a new stage. Do not spawn nested agents. Related
+follow-ups remain within the parent's assigned ownership and authorization.
 """

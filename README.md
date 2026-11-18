@@ -1,11 +1,12 @@
 # Sol Advisor
 
-**GPT-6.1 Sol / High runs the show. It declares a risk-gated route before task tools, keeps
-solo as the default, and uses a single auxiliary only when that improves delivery.**
+**GPT-6.2 Sol / High runs the show. Minimize total usage per accepted task: let
+lower-cost Luna/Terra workers execute bounded work, in parallel when useful.**
 
 Sol Advisor is a Codex-only workflow for capability-routed software delivery. You
 bring the goal and constraints; Sol owns the plan, implementation or delegation,
-verification, and acceptance.
+verification, and acceptance. Cost includes planning, context, review and retries;
+agent count alone is not the optimization target.
 
 ## Go deeper
 
@@ -13,7 +14,7 @@ I write [**Attention Heads**](https://attentionheads.substack.com/?utm_source=gi
 
 ## Quick start
 
-You need a current Codex CLI or ChatGPT desktop app with plugins enabled, GPT-6.1
+You need a current Codex CLI or ChatGPT desktop app with plugins enabled, GPT-6.2
 Sol / High for the primary session, native custom-agent support, and jq. GPT-6
 Luna / High, Luna / Max, or GPT-6.1 Terra / High access is needed only for its selected lane; Terra requires CLI 0.159.0+ when using the CLI.
 
@@ -45,26 +46,35 @@ acceptance.
 
 | Mode | Use it when | Delivery |
 |---|---|---|
-| `solo` | Default; risk is contained. | Root plans, implements, tests, and self-reviews. |
-| `delegate` | Bounded work with settled architecture and acceptance criteria. | Luna / High for routine coding; Luna / Max for deep technical work; Terra / High for writing, visual checks and authorized app operation. Root verifies. |
-| `audit` | Ambiguous, judgment-heavy, or high-risk implementation needs fresh scrutiny. | GPT-6.1 Sol / High root implements; a fresh read-only GPT-6.1 Sol / High reviews. |
-| `full` | Explicit broad or high-risk exception with a bounded implementation spec. | One selected Luna implementer or Terra specialist, root verification, and a fresh GPT-6.1 Sol / High review. |
+| `solo` | Small or coupled work where handoff costs more than direct execution. | Root plans, implements, tests, and self-reviews. |
+| `delegate` | Bounded work with settled interfaces and acceptance criteria. | One worker or 2-3 independent auxiliaries: Luna / High for coding, exploration, tests or logs; Luna / Max for deep technical work; Terra for specialty work. Root integrates and verifies. |
+| `audit` | Ambiguous, judgment-heavy, or high-risk implementation needs fresh scrutiny. | Root implements, optionally with independent read-only helpers; a fresh GPT-6.2 Sol / High reviews. |
+| `full` | Broad or high-risk work needs bounded delegation and independent review. | One worker or 2-3 independent auxiliaries, root integration/verification, then a fresh GPT-6.2 Sol / High review. |
 
-Terra visual checks supplement Sol's code review. Astra is a manual upgrade option; it is never automatically spawned.
-Solo is the default. One auxiliary is the default maximum; `full` is the explicit
-exception. Sol emits a `SELECTIVE ROUTE` declaration with the mode and concise risk
+Terra visual checks supplement Sol's code review. GPT-6.2 Astra and other Astra models are excluded for now.
+Solo is the default for small tasks. There is no one-worker default maximum: independent tasks may use 2-3 concurrent auxiliaries within the
+session limit, with disjoint write ownership and settled shared interfaces. Overlapping
+writes and dependent tasks run sequentially; parallelism alone does not require `full`.
+Sol emits a `SELECTIVE ROUTE` declaration with the mode and concise risk
 rationale before the first task tool call. If newly observed evidence changes who
 should implement or whether review is needed, Sol declares the revised route and
 reason. It never silently omits a promised review.
 
 ## What happens automatically
 
-GPT-6.1 Sol / High keeps architecture, decomposition, route selection, parent verification,
+GPT-6.2 Sol / High keeps architecture, decomposition, route selection, parent verification,
 escalation decisions, and acceptance in the primary task. Ambiguous or materially
-risky implementation decisions stay with GPT-6.1 Sol / High. Auxiliary work substitutes
-for root work; it does not duplicate it. The root inspects the complete diff and
-reruns the requested checks. When the selected route includes a review, a fresh GPT-6.1
-Sol / High reviewer returns ship, fix-first, or rethink; any fix requires a new review.
+risky implementation decisions stay with GPT-6.2 Sol / High; settled routine work can
+continue with workers. Auxiliary work substitutes
+for root work; it does not duplicate it. Workers own local checks; the root inspects the
+combined diff and owns final integration coverage. Passing evidence is reused only when
+the tested inputs, configuration and runtime still match; changed or uncertain inputs
+require affected checks to rerun. Reviews start with a fresh GPT-6.2 Sol / High.
+Every fix invalidates its verdict; ordinary bounded corrections reuse the reviewer and
+obtain a new verdict. High-risk, interface or scope changes require a new fresh reviewer.
+Selected-role preflight is reused within an unchanged primary session; worker
+follow-ups reuse verified identity. Do not repeat passing checks for a new stage
+or operator. Standard speed is the default.
 
 ## Updating
 

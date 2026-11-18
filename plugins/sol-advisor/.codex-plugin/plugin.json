@@ -1,7 +1,7 @@
 {
   "name": "sol-advisor",
-  "version": "0.10.0+codex.20261028",
-  "description": "Codex-native selective routing: GPT-6.1 Sol / High owns architecture and acceptance, Luna handles bounded coding, Terra handles specialty work, and Astra stays manual-only.",
+  "version": "0.11.0+codex.20261118",
+  "description": "Cost-aware Codex routing: GPT-6.2 Sol owns decisions and acceptance; lower-cost Luna/Terra workers execute bounded tasks in parallel, reusing valid checks. Astra is excluded for now.",
   "author": {
     "name": "Daniel McAteer",
     "url": "https://github.com/DannyMac180"
@@ -13,13 +13,13 @@
     "codex",
     "orchestration",
     "multi-agent",
-    "gpt-6.1"
+    "gpt-6.2"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Sol Advisor",
-    "shortDescription": "Sol owns the route; Luna codes, Terra handles specialty work, and Astra stays manual-only.",
-    "longDescription": "Sol Advisor keeps GPT-6.1 Sol / High in the primary session for architecture, judgment-heavy or high-risk implementation, verification, and acceptance. Before the first task tool call, Sol declares a machine-auditable SELECTIVE ROUTE: solo is the default; delegate uses native GPT-6 Luna / High for bounded work and GPT-6 Luna / Max only for fully specified deep technical work, or GPT-6.1 Terra / High for clear writing, visual understanding, visual/interaction checks and authorized browser or desktop operation; audit uses a fresh read-only GPT-6.1 Sol / High review; full combines one bounded implementer or specialty worker with a fresh review only for a broad or high-risk exception. Terra visual checks do not replace final Sol code review. GPT-6 Astra is a manual upgrade option and is never spawned automatically. Public role metadata is authoritative and missing, conflicting, unavailable, or unobservable routing evidence fails closed.",
+    "shortDescription": "Sol decides; lower-cost Luna/Terra workers execute in parallel to reduce total usage.",
+    "longDescription": "GPT-6.2 Sol / High in the primary session owns decisions, risky implementation, integration and acceptance. Minimize total usage per accepted task, including planning, context, execution, review and retries. Declare SELECTIVE ROUTE before task tools: solo is the default for small or coupled tasks where handoff costs more; delegate uses native GPT-6 Luna / High for bounded coding, exploration, tests and logs, GPT-6 Luna / Max only for fully specified deep technical work, or GPT-6.1 Terra / High for specialty work. Use 2-3 independent lower-cost auxiliaries when beneficial, with no one-worker default maximum and within runtime capacity. Audit uses a fresh read-only GPT-6.2 Sol / High review after root implementation; full combines bounded workers and Sol decisions with independent review. Pause only affected ambiguous or risky work; settled independent tasks may continue. Reuse selected-role preflight within the same unchanged primary session, verified worker identity for related follow-ups, and passing checks for matching inputs, configuration and runtime. Changed inputs or new risks invalidate affected evidence. Public routing evidence is authoritative; missing worker identity fails closed for that lane. High-risk review and observed read-only isolation remain required. GPT-6.2 Astra and all Astra models are excluded for now. Prefer Standard speed.",
     "developerName": "Daniel McAteer",
     "category": "Productivity",
     "capabilities": [
@@ -28,8 +28,8 @@
     ],
     "websiteURL": "https://github.com/ikunxdlyj/sol-advisor",
     "defaultPrompt": [
-      "Use $sol-advisor:orchestration to declare a SELECTIVE ROUTE before task tools, then build and verify this feature.",
-      "Use solo by default; select delegate, audit, or exceptional full only when the stated risk justifies it."
+      "Use $sol-advisor:orchestration with GPT-6.2 Sol to declare a SELECTIVE ROUTE, then deliver and verify this task at the lowest total usage.",
+      "Delegate bounded work to lower-cost Luna/Terra models, parallelize independent tasks within session limits, reuse valid preflight and verification, and choose audit/full only when independent review is needed. Do not use Astra."
     ]
   }
 }

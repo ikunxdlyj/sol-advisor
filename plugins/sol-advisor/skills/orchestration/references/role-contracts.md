@@ -1,8 +1,7 @@
 # Native Codex role contracts
 
 Use these contracts with Sol Advisor's namespaced, role-pinned native custom agents.
-They do not launch a nested Codex CLI or change global default-agent routing. Adapt
-every placeholder without removing a required field.
+They do not launch a nested Codex CLI or change global default-agent routing. Keep packets concise and complete the relevant placeholders without redundant context.
 
 For task-scoped preflight, runtime evidence, sandbox interpretation, and maintainer
 commands, use [operations.md](operations.md).
@@ -17,14 +16,18 @@ mode: solo | delegate | audit | full
 risk: <concise, task-specific rationale>
 ~~~
 
-Solo is the default; one auxiliary is the default maximum. Full is an explicit broad
-or high-risk exception. Declare any change of implementer or review commitment with
+Minimize total usage per accepted task, including planning, context, review and
+retries. Solo is the default for small or coupled tasks; explicitly delegate independent work
+to 2-3 concurrent auxiliaries when beneficial. Full is a broad or high-risk review
+choice when independent review is needed, not a requirement for parallel work. Declare changes of ownership or review commitment with
 the newly observed evidence. Never silently omit a promised review.
 
-For any selective route, confirm GPT-6.1 Sol / High in the primary session, then preflight only auxiliaries selected by
-the route: none for solo; Luna / High, Luna / Max, or Terra / High for delegate; fresh GPT-6.1 Sol / High
-for audit; and one selected implementer plus fresh GPT-6.1 Sol reviewer for full. Cache each
-successful check only for the task. After spawning, complete the selected role's
+Use GPT-6.2 Sol as primary; check available identity once, report missing primary
+identity once as unverified, and continue independent authorized work. Preflight
+only selected worker/reviewer roles. Reuse successful template checks across tasks
+within the same unchanged primary session; invalidate after installation, template
+or installed-role changes, a new primary session, or uncertain validity.
+After spawning, complete every agent's
 routing and reviewer-isolation checks before accepting the result:
 
 1. Require the selected exact native role and fresh-context spawn contract.
@@ -32,8 +35,14 @@ routing and reviewer-isolation checks before accepting the result:
    first, using the local runtime inspector only for omitted fields. Accept Luna /
    High for routine delegate/full implementation, Luna / Max only for bounded,
    fully specified deep technical work, Terra / High for bounded specialty work,
-   and GPT-6.1 Sol / High for audit/full review.
+   and GPT-6.2 Sol / High for audit/full review.
 3. For the reviewer, capture actual sandbox policy and permission profile types.
+
+Before parallel work, assign disjoint write ownership, settled shared interfaces,
+dependencies and verification owners. Cap all concurrent auxiliaries at three or the
+smaller runtime capacity excluding the root; include helpers and reviewers. Workers
+must not spawn nested agents. Serialize overlapping writes and shared mutable test/UI
+resources, and wait for all writes before final integration checks and review.
 
 A missing, stale, unsafe, conflicting, unavailable, inconsistent, or unobservable
 role/model/effort stops the native lane. Never silently fall back. Model and effort
@@ -66,9 +75,13 @@ VERIFICATION
   Success: <concrete expected result>
 - Inspect: <exact file, diff, or generated artifact>
   Success: <concrete expected evidence>
+- Ownership: <local checks this worker owns; integration checks owned by the root>
+- Evidence: <tested input snapshot including relevant config/dependencies, runtime,
+  exit status and output/artifacts; identify shared mutable resources to serialize>
 
 RETURN
 Return exact commands and actual evidence. A completion claim without evidence is invalid.
+Do not start nested agents or modify files outside your ownership.
 
 IMPLEMENTATION REPORT
 STATUS: complete | partial | blocked
@@ -79,29 +92,37 @@ JUDGMENT CALLS: <decisions the specification left open, or none>
 GAPS: <unfinished work, ambiguity, or none>
 ~~~
 
-The primary session must inspect the diff and rerun verification itself.
+The primary session inspects the combined diff, validates evidence and owns final
+integration coverage. Reuse passing checks with inspectable command, relevant tested
+inputs/configuration/runtime, exit status and key output/artifacts
+that still apply. Rerun affected checks after changed/uncertain inputs, failures, missing
+evidence or new risks. Do not rerun unchanged local checks solely to change who ran them.
+Use the verification ledger and invalidation rules in operations.md.
 
 ## Exact mode contracts
 
 - `solo`: root plans, implements, tests, and self-reviews. Spawn no auxiliary.
-- `delegate`: one selected Luna / High implementer executes the complete five-part
-  specification; use Luna / Max only for bounded, fully specified deep technical
+- `delegate`: one worker or 2-3 independent auxiliaries each execute a complete five-part
+  specification. Luna / High handles bounded routine implementation, exploration,
+  tests or logs; use Luna / Max only for bounded, fully specified deep technical
   work, or Terra / High for bounded writing, visual checks and authorized app operation.
-  The root verifies. Do not spawn a fresh reviewer by default.
-- `audit`: root implements and verifies. A fresh read-only GPT-6.1 Sol / High reviewer inspects
+  The root integrates and verifies. Do not spawn a fresh reviewer by default.
+- `audit`: root implements and verifies. A fresh read-only GPT-6.2 Sol / High reviewer inspects
   the accumulated diff. Prefer it for ambiguity, material risk, or judgment-heavy work.
-  Spawn no implementer. On `fix-first`, the root implements the correction, re-verifies,
-  and obtains a new fresh reviewer.
+  Spawn no implementer; independent read-only helpers may run in parallel.
+  On `fix-first`, the root implements the correction, updates affected verification,
+  and follows the reviewer reuse gate below.
 - `full`: use only for an explicit broad or high-risk exception with settled architecture
-  and acceptance criteria. One selected Luna / High, Luna / Max, or Terra / High worker executes
-  the complete specification, the root verifies, and a fresh read-only GPT-6.1 Sol / High
+  and acceptance criteria. One worker or 2-3 independent Luna/Terra auxiliaries execute
+  their complete specifications, the root integrates and verifies, and a fresh read-only GPT-6.2 Sol / High
   reviewer inspects the accumulated diff.
   On `fix-first`, the selected implementer handles a correction within the settled
-  spec; if GPT-6.1 Sol / High has taken over implementation, the root handles it. The root
-  re-verifies, and a new fresh reviewer inspects the result.
+  spec; if GPT-6.2 Sol / High has taken over implementation, the root handles it. The root
+  updates affected verification and follows the reviewer reuse gate below.
 
 Auxiliary work substitutes for root work; it must not duplicate it. If a worker reveals
-unsettled architecture, ambiguity, or material risk, GPT-6.1 Sol / High takes over implementation.
+unsettled architecture, ambiguity, or material risk, pause that part for a Sol decision.
+Sol owns risky implementation; independent settled work can remain with workers.
 Declare the changed route and evidence. Never silently omit review commitments.
 Solo and delegate have no fresh reviewer or review-driven correction unless a newly
 observed, risk-evidenced route escalation is declared; never silently add one.
@@ -111,8 +132,10 @@ observed, risk-evidenced route escalation is declared; never silently add one.
 Use this lane for bounded, fully specified work. The installed role pins GPT-6 Luna
 at high reasoning. It must surface ambiguity and failed checks rather than redesigning
 the architecture. A first result showing only a need for deeper technical reasoning
-may justify Luna / Max. Judgment-heavy or high-risk decisions return to GPT-6.1 Sol / High.
+may justify Luna / Max. Judgment-heavy or high-risk decisions return to GPT-6.2 Sol / High.
 If the specification itself was incomplete or wrong, correct it before another attempt.
+Reuse a worker for related follow-ups in the same task with unchanged role, ownership
+and authorization; reuse verified runtime identity until those settings change.
 
 Spawn exactly:
 
@@ -137,7 +160,7 @@ constraint, and surface ambiguity instead of redesigning the architecture.
 Use this lane only when a declared delegate or full route selects bounded, fully
 specified work whose technical depth justifies extra reasoning time and usage. The
 installed role pins GPT-6 Luna at max reasoning. Do not use it to transfer unsettled
-architecture, ambiguous requirements, or material risk away from GPT-6.1 Sol / High.
+architecture, ambiguous requirements, or material risk away from GPT-6.2 Sol / High.
 
 Spawn exactly:
 
@@ -152,7 +175,7 @@ Do not attach per-spawn model or reasoning fields. Prompt:
 ROLE
 Act as Sol Advisor's exceptional deep-reasoning worker. Execute the bounded,
 fully specified work within the settled architecture, preserve every stated interface
-and constraint, and return ambiguous or high-risk decisions to GPT-6.1 Sol / High.
+and constraint, and return ambiguous or high-risk decisions to GPT-6.2 Sol / High.
 
 <paste and complete the Shared implementation contract>
 ~~~
@@ -193,22 +216,14 @@ SPECIALTY SCOPE
 - Return material ambiguity, architectural changes and risk decisions to the parent.
 ~~~
 
-## Astra - manual upgrade only
+## Astra - excluded for now
 
-For exceptionally demanding cross-system reasoning, research or architecture,
-the primary may recommend GPT-6 Astra and explain why. Suspend the selective route
-and hand off the goal, constraints, unresolved decision, exact files and verification
-evidence. The user selects the model and effort manually for a consultation outside
-these four routes. An explicitly selected Astra consultation does not run pinned
-auxiliaries, satisfy Sol preflight, accept implementation or issue a final review
-verdict. Resume routing only after GPT-6.1 Sol / High is selected and re-verified;
-Sol evaluates the advice and owns implementation and the usual review gate.
-Do not install an Astra role, spawn Astra automatically, silently substitute it,
-or claim to have switched the primary session.
+Do not use GPT-6.2 Astra or any Astra model, including manual-upgrade recommendations
+and fallback routing, unless the user changes this constraint.
 
-## Fresh GPT-6.1 Sol / High - requested-read-only audit/full reviewer
+## Fresh GPT-6.2 Sol / High - requested-read-only audit/full reviewer
 
-Only for an audit or full route, after parent verification, spawn a new native thread
+Only for an audit or full route, after parent verification, start the initial review in a new native thread
 exactly:
 
 ~~~text
@@ -216,7 +231,7 @@ agent_type: sol_advisor_sol_reviewer
 fork_turns: none
 ~~~
 
-The installed role pins GPT-6.1 Sol / High and requests a read-only sandbox. Do not attach
+The installed role pins GPT-6.2 Sol / High and requests a read-only sandbox. Do not attach
 per-spawn model or reasoning fields. Observe the actual role, pin, sandbox policy, and
 permission profile before accepting its verdict.
 
@@ -243,6 +258,8 @@ VERIFICATION EVIDENCE
 REVIEW
 Inspect the actual files and accumulated change set. Judge correctness, completeness,
 regressions, scope discipline, interface preservation, test adequacy, and material risk.
+For a permitted correction follow-up, inspect the correction and affected context against
+the current accumulated state and updated evidence. Issue a new verdict; do not implement fixes.
 
 SOL REVIEW
 VERDICT: ship | fix-first | rethink
@@ -251,8 +268,16 @@ FINDINGS: <precise file references and required fixes, or none>
 RESIDUAL RISK: <most important remaining risk, or none>
 ~~~
 
-If any fix is made after review, discard the verdict and run a new fresh review.
-GPT-6.1 Sol reviewing GPT-6.1 Sol is context-clean, not cross-model-family independence.
+If any fix is made after review, discard the verdict. Reuse the same read-only reviewer
+only for a bounded ordinary correction with unchanged scope, interfaces and risk,
+and no high-risk boundary involved;
+send a follow-up with the correction diff, current accumulated state and updated evidence,
+and require a new verdict. Use a new fresh reviewer for high-risk changes or corrections,
+architecture/interface/scope changes, unavailable or uncertain review context, or a
+required independent review. Security, tenant isolation, money, irreversible data
+operations and external side effects remain high-risk boundaries. Fresh review covers
+the accumulated change; reviewer reuse does not relax runtime or read-only state checks.
+GPT-6.2 Sol reviewing GPT-6.2 Sol is context-clean, not cross-model-family independence.
 
 Use observed isolation, not requested isolation:
 
