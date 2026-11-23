@@ -1,4 +1,4 @@
 interface:
   display_name: "Sol Advisor Orchestration"
-  short_description: "Route with Sol, Luna and Terra; keep Astra a manual upgrade"
-  default_prompt: "Use $orchestration to declare a SELECTIVE ROUTE before task tools; default to solo, use Luna for bounded coding or Terra for specialty work, and keep Astra manual-only."
+  short_description: "Reduce total usage with parallel lower-cost workers"
+  default_prompt: "Use $orchestration with GPT-6.2 Sol to choose a cost-aware SELECTIVE ROUTE, delegate bounded work to lower-cost Luna/Terra workers in parallel when useful, reuse valid preflight and checks, and keep risk-based review. Do not use Astra."
